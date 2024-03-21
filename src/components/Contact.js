@@ -1,5 +1,6 @@
 // Contact.js
 import React from "react";
+import SEO from "./SEO";
 import {
   FaEnvelope,
   FaPhone,
