@@ -26,11 +26,11 @@ const Contact = ({ theme }) => {
             </p>
             <div className="flex items-center mb-4">
               <FaEnvelope className="mr-2" />
-              <span>contact@textformattingtool.com</span>
+              <span>contact@textformat.io</span>
             </div>
             <div className="flex items-center mb-4">
               <FaPhone className="mr-2" />
-              <span>+1 (555) 123-4567</span>
+              <span>+44 (782) 692-0261</span>
             </div>
           </div>
           <div>
