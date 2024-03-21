@@ -15,6 +15,11 @@ const Contact = ({ theme }) => {
         theme === "dark" ? "bg-gray-900 text-white" : "bg-white"
       } min-h-screen`}
     >
+      <SEO
+        title="Contact Us - Text Formatting Tool"
+        description="If you have any queries about this amazing tool please feel free to contact us."
+        keywords="contact us, get in touch"
+      />
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
         <h1 className="text-3xl font-bold mb-6">Contact Us</h1>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
