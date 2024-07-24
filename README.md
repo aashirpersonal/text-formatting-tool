@@ -1,6 +1,10 @@
 # Text Formatting Tool
 
 **The most advanced text formatting tool built with React**
+
+**See it Live [https://text-formatting-tool-6722790c2678.herokuapp.com/](https://text-formatting-tool-6722790c2678.herokuapp.com/)**
+
+
 ![screely-1721844509954](https://github.com/user-attachments/assets/d02eba69-5e8d-4e47-b17a-5dd883e6c3e3)
 ![screely-1721844587251](https://github.com/user-attachments/assets/cff894e5-9ee8-47c3-af48-79b39e727c2f)
 
