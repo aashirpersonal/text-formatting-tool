@@ -29,15 +29,14 @@ const Dashboard = ({ theme }) => {
 
   if (isMobile) {
     return (
-      <div className="h-screen w-full flex flex-col overflow-hidden">
-        <div className="flex-1 p-2 overflow-auto space-y-4">
-          {/* Middle Column: Text Editor on top */}
+      <div className="w-full flex flex-col">
+        <div className="p-2 overflow-auto space-y-4">
+          {/* Mobile content: Text Editor, Operations, AI Assistant */}
           <div className={`${theme === 'dark' ? 'bg-gray-800' : 'bg-white'} p-2 rounded-lg shadow-sm`}>
             <h2 className={`text-lg font-bold mb-2 ${theme === 'dark' ? 'text-gray-200' : 'text-gray-700'}`}>Text Editor</h2>
             <DashboardTextArea text={text} updateText={updateText} undo={undo} redo={redo} theme={theme} />
           </div>
 
-          {/* Left Column: Operations */}
           <div className={`${theme === 'dark' ? 'bg-gray-800' : 'bg-white'} p-2 rounded-lg shadow-sm`}>
             <h2 className={`text-lg font-bold mb-2 ${theme === 'dark' ? 'text-gray-200' : 'text-gray-700'}`}>Operations</h2>
             <div className="space-y-4">
@@ -68,8 +67,7 @@ const Dashboard = ({ theme }) => {
             </div>
           </div>
 
-          {/* Right Column: AI Assistant */}
-          <div className={`${theme === 'dark' ? 'bg-gray-800' : 'bg-white'} p-2 flex flex-col rounded-lg shadow-sm`}>
+          <div className={`${theme === 'dark' ? 'bg-gray-800' : 'bg-white'} p-2 flex flex-col rounded-lg shadow-sm` }>
             <AIAssistant text={text} updateText={updateText} theme={theme} />
           </div>
         </div>
