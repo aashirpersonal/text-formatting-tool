@@ -37,11 +37,7 @@ const ReplaceText = ({ text, updateText, theme, showInfo, setShowInfo }) => {
         <h2 className="text-xl font-bold">Replace Text</h2>
         <button
           onClick={() => setShowInfo(!showInfo)}
-          className={`focus:outline-none ${
-            theme === "dark"
-              ? "text-gray-400 hover:text-white"
-              : "text-gray-600 hover:text-blue-500"
-          }`}
+          className="focus:outline-none"
         >
           <FaInfoCircle className="h-5 w-5" />
         </button>
@@ -56,30 +52,27 @@ const ReplaceText = ({ text, updateText, theme, showInfo, setShowInfo }) => {
           onClick={() => setShowInfo(false)}
         >
           <div
-            className={`p-6 rounded-md shadow-md ${
+            className={`p-6 border-2 ${
               theme === "dark"
-                ? "bg-gray-800 text-white"
-                : "bg-white text-gray-800"
-            }`}
+                ? "bg-gray-800 text-white border-gray-600"
+                : "bg-white text-gray-800 border-gray-400"
+            } focus:outline-none`}
             onClick={(e) => e.stopPropagation()}
           >
             <h3 className="text-lg font-bold mb-2">
               Replace Text Documentation
             </h3>
             <p className="mb-2">
-              The replace text section allows you to search for specific text
-              patterns and replace them with new text.
+              The replace text section allows you to search for specific text patterns and replace them with new text.
             </p>
             <ul className="list-disc pl-6">
               <li>Enter the text to search for in the "Search Text" field.</li>
               <li>Enter the replacement text in the "Replace Text" field.</li>
               <li>
-                Check the "Use Regular Expression" box to use regular
-                expressions for searching.
+                Check the "Use Regular Expression" box to use regular expressions for searching.
               </li>
               <li>
-                Check the "Case Sensitive" box to perform a case-sensitive
-                search.
+                Check the "Case Sensitive" box to perform a case-sensitive search.
               </li>
               <li>
                 Click the "Replace" button to perform the text replacement.
@@ -101,14 +94,14 @@ const ReplaceText = ({ text, updateText, theme, showInfo, setShowInfo }) => {
             id="searchText"
             value={searchText}
             onChange={(e) => setSearchText(e.target.value)}
-            className={`w-full border ${
-              theme === "dark"
-                ? "bg-gray-800 border-gray-700"
-                : "border-gray-300"
-            } rounded-md p-2`}
             placeholder={
               useRegex ? "Enter regular expression" : "Enter text to search"
             }
+            className={`w-full border ${
+              theme === "dark"
+                ? "bg-gray-800 border-gray-700 text-white"
+                : "bg-white border-gray-300 text-gray-800"
+            } p-2 focus:outline-none`}
           />
         </div>
         <div className="sm:col-span-2">
@@ -123,12 +116,12 @@ const ReplaceText = ({ text, updateText, theme, showInfo, setShowInfo }) => {
             id="replaceText"
             value={replaceText}
             onChange={(e) => setReplaceText(e.target.value)}
+            placeholder="Enter replacement text"
             className={`w-full border ${
               theme === "dark"
-                ? "bg-gray-800 border-gray-700"
-                : "border-gray-300"
-            } rounded-md p-2`}
-            placeholder="Enter replacement text"
+                ? "bg-gray-800 border-gray-700 text-white"
+                : "bg-white border-gray-300 text-gray-800"
+            } p-2 focus:outline-none`}
           />
           <p className="text-sm text-gray-500 mt-2">
             Use %N for newline in Replace Text
@@ -163,13 +156,13 @@ const ReplaceText = ({ text, updateText, theme, showInfo, setShowInfo }) => {
         <div className="sm:col-span-2">
           <button
             onClick={handleReplace}
-            className={`w-full ${
+            className={`w-full px-3 py-2 border-2 ${
               theme === "dark"
-                ? "bg-blue-600 hover:bg-blue-700"
-                : "bg-blue-500 hover:bg-blue-600"
-            } text-white font-medium py-2 px-4 rounded`}
+                ? "bg-blue-600 hover:bg-blue-700 text-white border-blue-700"
+                : "bg-blue-500 hover:bg-blue-600 text-white border-blue-600"
+            } font-medium focus:outline-none`}
           >
-            Replace
+            Replace Text
           </button>
         </div>
       </div>

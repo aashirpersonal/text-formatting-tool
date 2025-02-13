@@ -2,23 +2,17 @@ import React from "react";
 
 const CapitalizeWords = ({ text, updateText, theme }) => {
   const handleCapitalizeWords = () => {
-    const formattedText = text
-      .split(" ")
-      .map((word) => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
-      .join(" ");
-
-    updateText(formattedText);
+    const newText = text.replace(/\b\w/g, char => char.toUpperCase());
+    updateText(newText);
   };
 
   return (
     <button
-      className={`${
+      className={`px-3 py-2 border ${
         theme === "dark"
-          ? "bg-gray-700 hover:bg-gray-600 text-white"
-          : "bg-white hover:bg-gray-100 text-gray-800"
-      } font-medium py-2 px-4 border ${
-        theme === "dark" ? "border-gray-600" : "border-gray-400"
-      } rounded shadow`}
+          ? "bg-gray-800 hover:bg-gray-700 text-white border-gray-700"
+          : "bg-white hover:bg-gray-100 text-gray-800 border-gray-300"
+      } font-normal focus:outline-none`}
       onClick={handleCapitalizeWords}
     >
       Capitalize Words

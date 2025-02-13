@@ -40,39 +40,48 @@ const AIAssistant = ({ text, updateText, theme }) => {
       return "The text area is empty. Please enter some text before asking me to perform operations on it.";
     }
 
+    const sampleText = text.length > 200 ? text.substring(0, 200) + "..." : text;
     const messages = [
-      { role: "system", content: "You are an AI assistant for a text formatting tool. Your task is to understand the user's request and generate JavaScript code to perform text operations. The code should be a function that takes a single parameter 'inputText' and returns the modified text." },
-      { role: "user", content: `The current text is: "${text}". The user wants to: ${query}. Please provide a JavaScript function to perform this operation. If the operation isn't clear or possible, explain why and ask for clarification. Return your response as a JSON object with 'explanation' and 'code' fields. The code should be a complete function that takes 'inputText' as a parameter and returns the modified text.` }
+      {
+        role: "user",
+        content: `You are an AI assistant for a text formatting tool that generates JavaScript functions to transform text. When provided with a short sample of the user's text and a clear transformation instruction, generate a complete JavaScript function that takes a single parameter 'inputText' and returns the modified text. Your response must be a well-formed JSON object with exactly two keys: 'explanation' and 'code'. Do not include any additional text.
+
+Text Sample: \"${sampleText}\"
+Instruction: \"${query}\". Please generate a JavaScript function named "transformText" that takes 'inputText' as its parameter and returns the text transformed as per the instruction.`
+      }
     ];
 
     try {
       const completion = await openai.chat.completions.create({
-        model: "gpt-3.5-turbo",
+        model: 'o1-mini',
         messages: messages,
-        temperature: 0.7,
-        max_tokens: 500
+        max_completion_tokens: 1000
       });
 
-      const response = JSON.parse(completion.choices[0].message.content);
+      let resultText = completion.choices[0].message.content.trim();
+      if (resultText.startsWith("```")) {
+        resultText = resultText.replace(/```[a-zA-Z]*\s*/, '').replace(/\s*```$/, '');
+      }
+      const result = JSON.parse(resultText);
 
-      if (response.code) {
+      if (result.code) {
         try {
           // Create a new function from the generated code
           const operationFunction = new Function('inputText', `
-            ${response.code}
-            return ${getFunctionName(response.code)}(inputText);
+            ${result.code}
+            return ${getFunctionName(result.code)}(inputText);
           `);
           // Apply the operation to the text
           const newText = operationFunction(text);
           // Update the text in the main component
           updateText(newText);
-          return `${response.explanation}\n\nI've applied the operation to your text.`;
+          return `${result.explanation}\n\nI've applied the operation to your text.`;
         } catch (error) {
           console.error('Error executing generated code:', error);
-          return `I generated some code, but encountered an error when trying to run it. Here's what I was attempting to do:\n\n${response.explanation}\n\nError: ${error.message}\n\nGenerated code:\n${response.code}`;
+          return `I generated some code, but encountered an error when trying to run it. Here's what I was attempting to do:\n\n${result.explanation}\n\nError: ${error.message}\n\nGenerated code:\n${result.code}`;
         }
       } else {
-        return response.explanation;
+        return result.explanation;
       }
     } catch (error) {
       console.error('Error calling OpenAI API:', error);
@@ -90,8 +99,15 @@ const AIAssistant = ({ text, updateText, theme }) => {
   }, [conversation]);
 
   return (
-    <div className={`${theme === 'dark' ? 'bg-gray-800 text-white' : 'bg-white text-gray-800'} p-6 rounded-lg shadow-md`}>
-      <h2 className="text-2xl font-bold mb-4">AI Assistant</h2>
+    <div className={`${theme === 'dark' ? 'bg-brand-primary/10 text-white' : 'bg-white text-brand-primary'} p-6 rounded-2xl shadow-xl border border-brand-primary/10`}>
+      <div className="flex items-center gap-3 mb-6">
+        <span className="bg-brand-accent/20 p-2 rounded-lg">
+          <svg className="w-6 h-6 text-brand-accent" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 10V3L4 14h7v7l9-11h-7z"/>
+          </svg>
+        </span>
+        <h2 className="text-2xl font-bold text-brand-primary">AI-Powered Transformations</h2>
+      </div>
       <div className="h-64 overflow-y-auto mb-4 p-4 border rounded">
         {conversation.map((message, index) => (
           <div key={index} className={`mb-3 ${message.role === 'user' ? 'text-right' : 'text-left'}`}>

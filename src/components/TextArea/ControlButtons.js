@@ -52,18 +52,20 @@ const ControlButton = ({ icon: Icon, onClick, disabled, tooltip, theme }) => (
     <button
       onClick={onClick}
       disabled={disabled}
-      className={`${
-        theme === "dark" ? "text-gray-400" : "text-gray-600"
-      } hover:text-blue-500 focus:outline-none`}
+      className={`px-3 py-2 border ${
+        theme === "dark"
+          ? "bg-gray-800 hover:bg-gray-700 text-white border-gray-700"
+          : "bg-white hover:bg-gray-100 text-gray-800 border-gray-300"
+      } font-normal focus:outline-none`}
     >
       <Icon className="h-5 w-5" />
     </button>
     <span
-      className={`absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-2 py-1 rounded-md text-sm ${
+      className={`absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-2 py-1 text-sm ${
         theme === "dark"
-          ? "bg-gray-700 text-white"
+          ? "bg-gray-800 text-white"
           : "bg-gray-100 text-gray-800"
-      } opacity-0 group-hover:opacity-100 transition-opacity duration-200`}
+      } rounded-none opacity-0 group-hover:opacity-100 transition-opacity duration-200`}
     >
       {tooltip}
     </span>

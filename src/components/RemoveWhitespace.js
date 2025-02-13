@@ -2,22 +2,20 @@ import React from "react";
 
 const RemoveWhitespace = ({ text, updateText, theme }) => {
   const handleRemoveWhitespace = () => {
-    const formattedText = text.replace(/\s+/g, " ");
-    updateText(formattedText);
+    const newText = text.replace(/\s+/g, " ").trim();
+    updateText(newText);
   };
 
   return (
     <button
-      onClick={handleRemoveWhitespace}
-      className={`${
+      className={`px-3 py-2 border ${
         theme === "dark"
-          ? "bg-gray-700 hover:bg-gray-600 text-white"
-          : "bg-white hover:bg-gray-100 text-gray-800"
-      } font-medium py-2 px-4 border ${
-        theme === "dark" ? "border-gray-600" : "border-gray-400"
-      } rounded shadow`}
+          ? "bg-gray-800 hover:bg-gray-700 text-white border-gray-700"
+          : "bg-white hover:bg-gray-100 text-gray-800 border-gray-300"
+      } font-normal focus:outline-none`}
+      onClick={handleRemoveWhitespace}
     >
-      Remove Whitespace
+      Remove Extra Spaces
     </button>
   );
 };

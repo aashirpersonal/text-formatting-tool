@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
-import TextArea from "./components/TextArea";
+import Dashboard from "./components/Dashboard";
 import Navigation from "./components/Navigation";
 import PrivacyPolicy from "./components/PrivacyPolicy";
 import Contact from "./components/Contact";
@@ -19,7 +19,7 @@ const App = () => {
     <Router>
       <div
         className={`min-h-screen flex flex-col ${
-          theme === "dark" ? "bg-gray-900 text-white" : "bg-gray-100"
+          theme === "dark" ? "dark bg-gray-900 text-white" : "bg-gray-100"
         }`}
       >
         <SEO
@@ -30,7 +30,7 @@ const App = () => {
         <Navigation theme={theme} onThemeChange={handleThemeChange} />
         <main className="flex-grow">
           <Routes>
-            <Route path="/" element={<TextArea theme={theme} />} />
+            <Route path="/" element={<Dashboard theme={theme} />} />
             <Route path="/how-to-use" element={<HowToUse theme={theme} />} />
             <Route path="/privacy" element={<PrivacyPolicy theme={theme} />} />
             <Route path="/contact" element={<Contact theme={theme} />} />
