@@ -10,16 +10,12 @@ const Navigation = ({ theme, onThemeChange }) => {
   };
 
   return (
-    <nav className={`bg-${theme === "dark" ? "gray-800" : "white"} shadow-md`}>
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <nav className={`${theme === "dark" ? "bg-gradient-to-r from-gray-900 to-gray-700" : "bg-gradient-to-r from-gray-100 to-white"} transition duration-300`}>
+      <div className="w-full px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16">
           <div className="flex items-center">
             <div className="flex-shrink-0">
-              <img
-                className="h-8 w-8"
-                src="https://tailwindui.com/img/logos/workflow-mark-indigo-500.svg"
-                alt="Workflow"
-              />
+              <img src={theme === "dark" ? "/logo-dark.svg" : "/logo.svg"} alt="Logo" className="h-12 w-auto transition-all duration-300 ease-in-out" />
             </div>
             <div className="hidden md:block">
               <div className="ml-10 flex items-baseline space-x-4">
@@ -29,7 +25,7 @@ const Navigation = ({ theme, onThemeChange }) => {
                     theme === "dark"
                       ? "text-gray-300 hover:bg-gray-700 hover:text-white"
                       : "text-gray-800 hover:bg-gray-100"
-                  } px-3 py-2 rounded-md text-sm font-medium`}
+                  } px-3 py-2 rounded-md text-sm font-medium transition-transform duration-200 hover:scale-105`}
                 >
                   Home
                 </Link>
@@ -39,7 +35,7 @@ const Navigation = ({ theme, onThemeChange }) => {
                     theme === "dark"
                       ? "text-gray-300 hover:bg-gray-700 hover:text-white"
                       : "text-gray-800 hover:bg-gray-100"
-                  } px-3 py-2 rounded-md text-sm font-medium`}
+                  } px-3 py-2 rounded-md text-sm font-medium transition-transform duration-200 hover:scale-105`}
                 >
                   How to Use
                 </Link>
@@ -50,7 +46,7 @@ const Navigation = ({ theme, onThemeChange }) => {
                     theme === "dark"
                       ? "text-gray-300 hover:bg-gray-700 hover:text-white"
                       : "text-gray-800 hover:bg-gray-100"
-                  } px-3 py-2 rounded-md text-sm font-medium`}
+                  } px-3 py-2 rounded-md text-sm font-medium transition-transform duration-200 hover:scale-105`}
                 >
                   Contact Us
                 </Link>
@@ -60,7 +56,7 @@ const Navigation = ({ theme, onThemeChange }) => {
                     theme === "dark"
                       ? "text-gray-300 hover:bg-gray-700 hover:text-white"
                       : "text-gray-800 hover:bg-gray-100"
-                  } px-3 py-2 rounded-md text-sm font-medium`}
+                  } px-3 py-2 rounded-md text-sm font-medium transition-transform duration-200 hover:scale-105`}
                 >
                   Privacy Policy
                 </Link>
@@ -71,11 +67,11 @@ const Navigation = ({ theme, onThemeChange }) => {
             <div className="-mr-2 flex md:hidden">
               <button
                 onClick={handleToggle}
-                className={`inline-flex items-center justify-center p-2 rounded-md ${
+                className={`inline-flex items-center justify-center p-2 rounded-md transition transform duration-200 ${
                   theme === "dark"
                     ? "text-gray-400 hover:text-white"
                     : "text-gray-800 hover:text-gray-600"
-                } focus:outline-none`}
+                } focus:outline-none hover:scale-110`}
               >
                 {isOpen ? (
                   <FaTimes className="block h-6 w-6" />
@@ -91,7 +87,7 @@ const Navigation = ({ theme, onThemeChange }) => {
                   theme === "dark"
                     ? "bg-gray-700 hover:bg-gray-600"
                     : "bg-gray-100 hover:bg-gray-200"
-                } p-2 rounded-full focus:outline-none`}
+                } p-2 rounded-full focus:outline-none transition-transform duration-200 hover:scale-110`}
               >
                 {theme === "dark" ? (
                   <FaSun className="text-white" />
@@ -111,7 +107,7 @@ const Navigation = ({ theme, onThemeChange }) => {
               theme === "dark"
                 ? "text-gray-300 hover:bg-gray-700 hover:text-white"
                 : "text-gray-800 hover:bg-gray-100"
-            } block px-3 py-2 rounded-md text-base font-medium`}
+            } block px-3 py-2 rounded-md text-base font-medium transition-transform duration-200 hover:scale-105`}
           >
             Home
           </Link>
@@ -121,7 +117,7 @@ const Navigation = ({ theme, onThemeChange }) => {
               theme === "dark"
                 ? "text-gray-300 hover:bg-gray-700 hover:text-white"
                 : "text-gray-800 hover:bg-gray-100"
-            } block px-3 py-2 rounded-md text-base font-medium`}
+            } block px-3 py-2 rounded-md text-base font-medium transition-transform duration-200 hover:scale-105`}
           >
             How to Use
           </Link>
@@ -131,7 +127,7 @@ const Navigation = ({ theme, onThemeChange }) => {
               theme === "dark"
                 ? "text-gray-300 hover:bg-gray-700 hover:text-white"
                 : "text-gray-800 hover:bg-gray-100"
-            } block px-3 py-2 rounded-md text-base font-medium`}
+            } block px-3 py-2 rounded-md text-base font-medium transition-transform duration-200 hover:scale-105`}
           >
             Contact Us
           </Link>
@@ -141,7 +137,7 @@ const Navigation = ({ theme, onThemeChange }) => {
               theme === "dark"
                 ? "text-gray-300 hover:bg-gray-700 hover:text-white"
                 : "text-gray-800 hover:bg-gray-100"
-            } block px-3 py-2 rounded-md text-base font-medium`}
+            } block px-3 py-2 rounded-md text-base font-medium transition-transform duration-200 hover:scale-105`}
           >
             Privacy Policy
           </Link>

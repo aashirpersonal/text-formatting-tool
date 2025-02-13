@@ -19,7 +19,7 @@ const App = () => {
     <Router>
       <div
         className={`min-h-screen flex flex-col ${
-          theme === "dark" ? "dark bg-gray-900 text-white" : "bg-gray-100"
+          theme === "dark" ? "dark bg-gray-900 text-white" : "bg-white"
         }`}
       >
         <SEO

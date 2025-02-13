@@ -99,7 +99,7 @@ Instruction: \"${query}\". Please generate a JavaScript function named "transfor
   }, [conversation]);
 
   return (
-    <div className={`${theme === 'dark' ? 'bg-brand-primary/10 text-white' : 'bg-white text-brand-primary'} p-6 rounded-2xl shadow-xl border border-brand-primary/10`}>
+    <div className={`${theme === 'dark' ? 'bg-brand-primary/10 text-white' : 'bg-white text-brand-primary'} p-6 rounded-2xl  border border-brand-primary/10`}>
       <div className="flex items-center gap-3 mb-6">
         <span className="bg-brand-accent/20 p-2 rounded-lg">
           <svg className="w-6 h-6 text-brand-accent" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -110,16 +110,19 @@ Instruction: \"${query}\". Please generate a JavaScript function named "transfor
       </div>
       <div className="h-64 overflow-y-auto mb-4 p-4 border rounded">
         {conversation.map((message, index) => (
-          <div key={index} className={`mb-3 ${message.role === 'user' ? 'text-right' : 'text-left'}`}>
-            <span className={`inline-block p-3 rounded-lg ${
-              message.role === 'user' 
-                ? 'bg-blue-500 text-white' 
-                : theme === 'dark' 
-                  ? 'bg-gray-700 text-white'
-                  : 'bg-gray-200 text-gray-800'
-            }`}>
+          <div key={index} className={`mb-3 flex items-start ${message.role === 'user' ? 'justify-end' : 'justify-start'}`}>
+            {message.role === 'user' ? (
+              <div className="mr-2">
+                <div className="w-8 h-8 rounded-full bg-blue-500 flex items-center justify-center text-white font-bold">U</div>
+              </div>
+            ) : (
+              <div className="mr-2">
+                <div className="w-8 h-8 rounded-full bg-gray-500 flex items-center justify-center text-white font-bold">A</div>
+              </div>
+            )}
+            <div className={`max-w-[70%] inline-block p-3 rounded-lg ${message.role === 'user' ? 'bg-blue-500 text-white' : (theme === 'dark' ? 'bg-gray-700 text-white' : 'bg-gray-200 text-gray-800')}`}>
               {message.content}
-            </span>
+            </div>
           </div>
         ))}
         <div ref={chatEndRef} />
@@ -136,13 +139,23 @@ Instruction: \"${query}\". Please generate a JavaScript function named "transfor
           }`}
           placeholder="Ask the AI assistant..."
           disabled={isLoading}
+          aria-label="AI query input"
         />
         <button 
           type="submit"
+          aria-label="Send query"
           className={`bg-blue-500 hover:bg-blue-600 text-white p-3 rounded-r-lg transition duration-200 ${isLoading ? 'opacity-50 cursor-not-allowed' : ''}`}
           disabled={isLoading}
         >
-          {isLoading ? 'Processing...' : 'Send'}
+          {isLoading ? (
+            <>
+              <svg className="animate-spin inline-block w-5 h-5 mr-2" viewBox="0 0 24 24">
+                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z"></path>
+              </svg>
+              Processing...
+            </>
+          ) : 'Send'}
         </button>
       </form>
     </div>
