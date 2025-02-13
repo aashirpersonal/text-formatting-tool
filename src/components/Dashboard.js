@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useTextHistory } from './utils';
 import AIAssistant from './AIAssistant';
 import UpperCase from './UpperCase';
@@ -18,11 +18,70 @@ import Split from 'react-split';
 const Dashboard = ({ theme }) => {
   const [text, updateText, undo, redo] = useTextHistory("");
   const [showInfo, setShowInfo] = useState(false);
+  const [isMobile, setIsMobile] = useState(false);
 
+  useEffect(() => {
+    const handleResize = () => setIsMobile(window.innerWidth < 768);
+    handleResize();
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
+
+  if (isMobile) {
+    return (
+      <div className="h-screen w-full flex flex-col overflow-hidden">
+        <div className="flex-1 p-2 overflow-auto space-y-4">
+          {/* Middle Column: Text Editor on top */}
+          <div className={`${theme === 'dark' ? 'bg-gray-800' : 'bg-white'} p-2 rounded-lg shadow-sm`}>
+            <h2 className={`text-lg font-bold mb-2 ${theme === 'dark' ? 'text-gray-200' : 'text-gray-700'}`}>Text Editor</h2>
+            <DashboardTextArea text={text} updateText={updateText} undo={undo} redo={redo} theme={theme} />
+          </div>
+
+          {/* Left Column: Operations */}
+          <div className={`${theme === 'dark' ? 'bg-gray-800' : 'bg-white'} p-2 rounded-lg shadow-sm`}>
+            <h2 className={`text-lg font-bold mb-2 ${theme === 'dark' ? 'text-gray-200' : 'text-gray-700'}`}>Operations</h2>
+            <div className="space-y-4">
+              <div>
+                <h3 className={`text-md font-semibold mb-1 ${theme === 'dark' ? 'text-gray-300' : 'text-gray-600'}`}>Basic</h3>
+                <div className="flex flex-wrap gap-2">
+                  <UpperCase text={text} updateText={updateText} theme={theme} />
+                  <LowerCase text={text} updateText={updateText} theme={theme} />
+                  <CapitalizeSentences text={text} updateText={updateText} theme={theme} />
+                  <CapitalizeWords text={text} updateText={updateText} theme={theme} />
+                </div>
+              </div>
+              <div>
+                <h3 className={`text-md font-semibold mb-1 ${theme === 'dark' ? 'text-gray-300' : 'text-gray-600'}`}>Line Ops</h3>
+                <div className="flex flex-wrap gap-2">
+                  <TrimEachLine text={text} updateText={updateText} theme={theme} />
+                  <RemoveLineBreaks text={text} updateText={updateText} theme={theme} />
+                  <RemoveTabs text={text} updateText={updateText} theme={theme} />
+                  <RemoveWhitespace text={text} updateText={updateText} theme={theme} />
+                  <SortLinesAscending text={text} updateText={updateText} theme={theme} />
+                  <SortLinesDescending text={text} updateText={updateText} theme={theme} />
+                </div>
+              </div>
+              <div>
+                <h3 className={`text-md font-semibold mb-1 ${theme === 'dark' ? 'text-gray-300' : 'text-gray-600'}`}>Replacement</h3>
+                <ReplaceText text={text} updateText={updateText} theme={theme} showInfo={showInfo} setShowInfo={setShowInfo} />
+              </div>
+            </div>
+          </div>
+
+          {/* Right Column: AI Assistant */}
+          <div className={`${theme === 'dark' ? 'bg-gray-800' : 'bg-white'} p-2 flex flex-col rounded-lg shadow-sm`}>
+            <AIAssistant text={text} updateText={updateText} theme={theme} />
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // Desktop layout using Split
   return (
     <div className="h-screen w-full flex flex-col overflow-hidden">
       <div className="flex-1 p-2 overflow-hidden">
-      <style>{`
+        <style>{`
   .gutter {
     background-repeat: no-repeat;
     background-position: 50%;
@@ -57,13 +116,13 @@ const Dashboard = ({ theme }) => {
   }
 `}</style>
         <Split
-  className="flex h-full"
-  sizes={[25, 50, 25]}
-  minSize={[200, 400, 200]}
-  gutterSize={12}
-  snapOffset={30}
->
-          {/* Left Column: Other operations */}
+          className="flex h-full"
+          sizes={[25, 50, 25]}
+          minSize={[200, 400, 200]}
+          gutterSize={12}
+          snapOffset={30}
+        >
+          {/* Left Column: Operations */}
           <div className={`${theme === 'dark' ? 'bg-gray-800' : 'bg-white'} p-2 h-full overflow-auto rounded-lg shadow-sm`}>
             <h2 className={`text-lg font-bold mb-2 ${theme === 'dark' ? 'text-gray-200' : 'text-gray-700'}`}>Operations</h2>
             <div className="space-y-4">
