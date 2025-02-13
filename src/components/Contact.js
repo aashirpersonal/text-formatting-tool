@@ -43,7 +43,7 @@ const Contact = ({ theme }) => {
             <h2 className="text-2xl font-bold mb-4">Follow Us</h2>
             <div className="flex space-x-4">
               <a
-                href="#"
+                href="https://twitter.com"
                 className={`${
                   theme === "dark" ? "text-white" : "text-gray-800"
                 } hover:text-blue-500`}
@@ -51,7 +51,7 @@ const Contact = ({ theme }) => {
                 <FaTwitter size={24} />
               </a>
               <a
-                href="#"
+                href="https://facebook.com"
                 className={`${
                   theme === "dark" ? "text-white" : "text-gray-800"
                 } hover:text-blue-500`}
@@ -59,7 +59,7 @@ const Contact = ({ theme }) => {
                 <FaFacebook size={24} />
               </a>
               <a
-                href="#"
+                href="https://instagram.com"
                 className={`${
                   theme === "dark" ? "text-white" : "text-gray-800"
                 } hover:text-blue-500`}

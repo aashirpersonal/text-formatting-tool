@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
 import { useTextHistory } from './utils';
-import TextArea from './TextArea';
 import AIAssistant from './AIAssistant';
 import UpperCase from './UpperCase';
 import LowerCase from './LowerCase';

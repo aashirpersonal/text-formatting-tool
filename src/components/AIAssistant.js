@@ -46,8 +46,8 @@ const AIAssistant = ({ text, updateText, theme }) => {
         role: "user",
         content: `You are an AI assistant for a text formatting tool that generates JavaScript functions to transform text. When provided with a short sample of the user's text and a clear transformation instruction, generate a complete JavaScript function that takes a single parameter 'inputText' and returns the modified text. Your response must be a well-formed JSON object with exactly two keys: 'explanation' and 'code'. Do not include any additional text.
 
-Text Sample: \"${sampleText}\"
-Instruction: \"${query}\". Please generate a JavaScript function named "transformText" that takes 'inputText' as its parameter and returns the text transformed as per the instruction.`
+Text Sample: "${sampleText}"
+Instruction: "${query}". Please generate a JavaScript function named "transformText" that takes 'inputText' as its parameter and returns the text transformed as per the instruction.`
       }
     ];
 
@@ -66,7 +66,7 @@ Instruction: \"${query}\". Please generate a JavaScript function named "transfor
 
       if (result.code) {
         try {
-          // Create a new function from the generated code
+          // eslint-disable-next-line no-new-func
           const operationFunction = new Function('inputText', `
             ${result.code}
             return ${getFunctionName(result.code)}(inputText);
