@@ -1,8 +1,8 @@
 # Product blueprint — text transformation tool (v2)
 
-**Status:** Approved product direction. Application scaffold and local Worker-backed manual workspace exist on `v2-rebuild`. AI integration is not yet implemented.
+**Status:** Approved product direction. A mobile-first simple transform flow exists at `/app`, with the manual recipe editor at `/app/advanced`. Live AI generation is not yet implemented; a local prototype adapter covers approved examples only.
 **Date:** 2026-07-28
-**Related:** `docs/v2/ARCHITECTURE_DECISIONS.md`, `docs/audits/2026-07-28-legacy-v1-baseline.md`, `docs/evidence/EVIDENCE_REGISTER.md`
+**Related:** `docs/v2/ARCHITECTURE_DECISIONS.md`, `docs/v2/UX_RESET_V1.md`, `docs/audits/2026-07-28-legacy-v1-baseline.md`, `docs/evidence/EVIDENCE_REGISTER.md`
 
 ---
 

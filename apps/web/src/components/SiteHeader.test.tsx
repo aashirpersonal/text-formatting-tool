@@ -33,5 +33,6 @@ describe('SiteHeader', () => {
     expect(toggle).toHaveAttribute('aria-expanded', 'true');
     expect(toggle).toHaveAttribute('aria-controls');
     expect(screen.getByRole('navigation', { name: 'Primary' })).toBeVisible();
+    expect(screen.getByRole('link', { name: 'Advanced editor' })).toBeVisible();
   });
 });

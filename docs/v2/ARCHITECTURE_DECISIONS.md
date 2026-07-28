@@ -260,6 +260,20 @@ These ADRs record **approved direction**. They do not claim that the v2 applicat
 
 ---
 
+## ADR-018: Hide recipes behind a mobile-first simple primary UX
+
+| Field                     | Content                                                                                                                                                                                                                       |
+| ------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Status**                | Accepted — 2026-07-28                                                                                                                                                                                                         |
+| **Context**               | The manual recipe workspace exposed too much internal architecture for normal users and Product Hunt–style evaluation.                                                                                                        |
+| **Decision**              | Make `/app` a simple instruction → preview → local-apply flow. Keep the manual builder at `/app/advanced`. Hide JSON/operation internals behind Advanced details. Use a replaceable prototype generator until live AI exists. |
+| **Reasons**               | Five-second comprehension; mobile usability; preserve trusted engine architecture without forcing users to become recipe editors.                                                                                             |
+| **Alternatives rejected** | Keep the staged recipe builder as the only UI; fake a chatbot that pretends to be AI.                                                                                                                                         |
+| **Consequences**          | UX docs in `docs/v2/UX_RESET_V1.md`; prototype adapter must not overclaim AI capability.                                                                                                                                      |
+| **Unresolved questions**  | Exact copy for the live AI handoff notice when the server adapter lands.                                                                                                                                                      |
+
+---
+
 ## Summary table
 
 | ADR | Title                                                | Status             |
@@ -281,3 +295,4 @@ These ADRs record **approved direction**. They do not claim that the v2 applicat
 | 015 | Schema-constrained model output                      | Accepted           |
 | 016 | Engine as future npm/CLI                             | Accepted           |
 | 017 | Threat model + reproducible benchmarks               | Accepted           |
+| 018 | Hide recipes; simple mobile-first primary UX         | Accepted           |

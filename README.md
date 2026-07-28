@@ -12,7 +12,7 @@ Text Formatting Tool is intended to become an AI-guided, deterministic, privacy-
 4. The model returns a validated JSON transformation recipe — **never executable JavaScript**.
 5. A trusted browser-local engine applies the recipe to the complete document.
 
-**AI recipe generation is not implemented yet.** You can already build recipes manually and run them locally.
+**AI recipe generation is not implemented yet.** The `/app` flow uses a local prototype adapter for approved examples only. You can also build recipes manually in `/app/advanced`.
 
 ## Repository structure
 
@@ -27,14 +27,20 @@ docs/evidence/                    Evidence register
 
 ## Implemented now
 
-### Local workspace (manual recipes)
+### Simple local transform flow (`/app`)
+
+- Paste text or choose a file
+- Describe the change with example prompts
+- Prototype generator (examples only — not live AI)
+- Preview before/after, then apply locally in a Web Worker
+- Copy / download / restore original
+- See [`docs/v2/UX_RESET_V1.md`](docs/v2/UX_RESET_V1.md)
+
+### Advanced manual editor (`/app/advanced`)
 
 - Four-stage flow: Input → Recipe → Preview → Result
-- Manual editors for all eight Plan v1 operations, with reorder/enable/disable/remove
+- Manual editors for all eight Plan v1 operations
 - Built-in local templates (not AI-generated)
-- Schema validation via `@tft/transformation-schema`
-- Preview and full execution inside a **browser Web Worker**
-- Cancellation, stale-response protection, copy/download, restore original
 - See [`docs/v2/LOCAL_WORKSPACE_V1.md`](docs/v2/LOCAL_WORKSPACE_V1.md)
 
 ### Schema and engine libraries

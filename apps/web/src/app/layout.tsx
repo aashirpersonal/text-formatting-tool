@@ -1,12 +1,12 @@
 import type { Metadata } from 'next';
-import { IBM_Plex_Mono, IBM_Plex_Sans } from 'next/font/google';
+import { IBM_Plex_Mono, Plus_Jakarta_Sans } from 'next/font/google';
 import type { CSSProperties, ReactNode } from 'react';
 import { SiteHeader } from '@/components/SiteHeader';
 import './globals.css';
 
-const sans = IBM_Plex_Sans({
+const sans = Plus_Jakarta_Sans({
   subsets: ['latin'],
-  weight: ['400', '500', '600', '700'],
+  weight: ['400', '500', '600', '700', '800'],
   variable: '--font-sans-loaded',
   display: 'swap',
 });
@@ -24,7 +24,7 @@ export const metadata: Metadata = {
     template: '%s · Text Formatting Tool',
   },
   description:
-    'Turn plain-English instructions into safe, reusable text transformations. v2 is under active development.',
+    'Tell AI what to change. Apply it locally. Preview safe text transformations and process the full document in your browser.',
 };
 
 export default function RootLayout({ children }: { children: ReactNode }) {
@@ -47,7 +47,7 @@ export default function RootLayout({ children }: { children: ReactNode }) {
           <footer className="site-footer">
             <div className="container" style={{ paddingBlock: '1.25rem' }}>
               <p className="muted" style={{ margin: 0 }}>
-                Open-source work in progress. Legacy v1 is preserved in Git history under the{' '}
+                Open-source work in progress. Legacy v1 is preserved under the{' '}
                 <code>legacy-v1</code> tag.
               </p>
             </div>
