@@ -529,6 +529,17 @@ export function SimpleAppShell() {
                 {generationError}
               </p>
             ) : null}
+            <button
+              type="button"
+              className="button button-primary button-block"
+              disabled={!canGenerate}
+              aria-disabled={!canGenerate}
+              onClick={() => void generateTransformation()}
+              data-testid="generate-transformation"
+            >
+              <Sparkles size={16} aria-hidden />
+              Generate transformation
+            </button>
           </div>
         </section>
       )}
@@ -727,45 +738,34 @@ export function SimpleAppShell() {
         </section>
       ) : null}
 
-      <div className="sticky-action-bar" data-testid="sticky-action-bar">
-        {phase === 'compose' ? (
-          <button
-            type="button"
-            className="button button-primary button-block"
-            disabled={!canGenerate}
-            aria-disabled={!canGenerate}
-            onClick={() => void generateTransformation()}
-            data-testid="generate-transformation"
-          >
-            <Sparkles size={16} aria-hidden />
-            Generate transformation
-          </button>
-        ) : null}
-        {phase === 'ready' ? (
-          <button
-            type="button"
-            className="button button-primary button-block"
-            disabled={!canPreview}
-            aria-disabled={!canPreview}
-            onClick={() => void runPreview()}
-            data-testid="run-preview"
-          >
-            Preview changes
-          </button>
-        ) : null}
-        {phase === 'preview' && preview ? (
-          <button
-            type="button"
-            className="button button-primary button-block"
-            disabled={!canApply}
-            aria-disabled={!canApply}
-            onClick={() => void runFull()}
-            data-testid="run-full"
-          >
-            Apply to full text locally
-          </button>
-        ) : null}
-      </div>
+      {(phase === 'ready' || phase === 'preview') && (
+        <div className="sticky-action-bar" data-testid="sticky-action-bar">
+          {phase === 'ready' ? (
+            <button
+              type="button"
+              className="button button-primary button-block"
+              disabled={!canPreview}
+              aria-disabled={!canPreview}
+              onClick={() => void runPreview()}
+              data-testid="run-preview"
+            >
+              Preview changes
+            </button>
+          ) : null}
+          {phase === 'preview' && preview ? (
+            <button
+              type="button"
+              className="button button-primary button-block"
+              disabled={!canApply}
+              aria-disabled={!canApply}
+              onClick={() => void runFull()}
+              data-testid="run-full"
+            >
+              Apply to full text locally
+            </button>
+          ) : null}
+        </div>
+      )}
 
       <p className="muted advanced-link-row">
         Need manual control?{' '}

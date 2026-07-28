@@ -15,8 +15,7 @@ export default defineConfig({
   webServer: {
     command: `npm run dev -- --hostname 127.0.0.1 --port ${port}`,
     url: baseURL,
-    // Default: start a dedicated server. Set PLAYWRIGHT_REUSE_SERVER=1 to reuse.
-    reuseExistingServer: !process.env.CI && process.env.PLAYWRIGHT_REUSE_SERVER === '1',
+    reuseExistingServer: !process.env.CI,
     timeout: 120_000,
   },
   projects: [

@@ -709,6 +709,11 @@ button.chip:hover {
   backdrop-filter: blur(10px);
 }
 
+.example-chips,
+.compose-panel {
+  scroll-margin-bottom: calc(6rem + var(--safe-bottom));
+}
+
 .advanced-link-row {
   margin: 0;
   text-align: center;
