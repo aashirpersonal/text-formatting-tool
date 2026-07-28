@@ -1,6 +1,10 @@
-import { describe, expect, it, vi } from 'vitest';
+import { describe, expect, it } from 'vitest';
 import type { ExecutionResult } from '@tft/transformation-engine';
-import { TransformationWorkerClient } from './transformation-worker-client';
+import {
+  TransformationWorkerCancelledError,
+  TransformationWorkerClient,
+  isWorkerCancellation,
+} from './transformation-worker-client';
 import type { TransformationWorkerRequest, TransformationWorkerResponse } from './protocol';
 
 class MockWorker {
@@ -92,15 +96,15 @@ describe('TransformationWorkerClient', () => {
     });
   });
 
-  it('ignores stale responses after cancellation', async () => {
+  it('settles cancellation with a typed outcome and ignores stale responses', async () => {
     const worker = new MockWorker();
     const client = new TransformationWorkerClient(() => worker as unknown as Worker);
     const pending = client.execute({ mode: 'full', input: 'a', plan: {} });
     const requestId = worker.posted[0]!.requestId;
-    const settled = vi.fn();
-    void pending.then(settled, settled);
     client.cancel();
     expect(worker.terminated).toBe(true);
+    await expect(pending).rejects.toBeInstanceOf(TransformationWorkerCancelledError);
+    await expect(pending).rejects.toSatisfy((error: unknown) => isWorkerCancellation(error));
     worker.emit({
       type: 'success',
       requestId,
@@ -108,7 +112,23 @@ describe('TransformationWorkerClient', () => {
       result: successResult('stale'),
     });
     await Promise.resolve();
-    expect(settled).not.toHaveBeenCalled();
+    await expect(pending).rejects.toMatchObject({ code: 'WORKER_CANCELLED' });
+  });
+
+  it('does not expose partial output on cancellation', async () => {
+    const worker = new MockWorker();
+    const client = new TransformationWorkerClient(() => worker as unknown as Worker);
+    const pending = client.execute({ mode: 'full', input: 'partial', plan: {} });
+    client.cancel();
+    const outcome = await pending.then(
+      (result) => ({ kind: 'resolved' as const, result }),
+      (error) => ({ kind: 'rejected' as const, error }),
+    );
+    expect(outcome.kind).toBe('rejected');
+    if (outcome.kind === 'rejected') {
+      expect(isWorkerCancellation(outcome.error)).toBe(true);
+      expect(outcome.error).not.toHaveProperty('output');
+    }
   });
 
   it('can run again after cancellation with a fresh worker', async () => {
@@ -118,8 +138,9 @@ describe('TransformationWorkerClient', () => {
       workers.push(worker);
       return worker as unknown as Worker;
     });
-    void client.execute({ mode: 'preview', input: 'a', plan: {} });
+    const first = client.execute({ mode: 'preview', input: 'a', plan: {} });
     client.cancel();
+    await expect(first).rejects.toBeInstanceOf(TransformationWorkerCancelledError);
     const pending = client.execute({ mode: 'preview', input: 'b', plan: {} });
     expect(workers).toHaveLength(2);
     const requestId = workers[1]!.posted[0]!.requestId;
@@ -130,5 +151,37 @@ describe('TransformationWorkerClient', () => {
       result: successResult('ok'),
     });
     await expect(pending).resolves.toMatchObject({ ok: true, output: 'ok' });
+  });
+
+  it('dispose settles active execution before terminating', async () => {
+    const worker = new MockWorker();
+    const client = new TransformationWorkerClient(() => worker as unknown as Worker);
+    const pending = client.execute({ mode: 'full', input: 'a', plan: {} });
+    client.dispose();
+    expect(worker.terminated).toBe(true);
+    await expect(pending).rejects.toBeInstanceOf(TransformationWorkerCancelledError);
+    await expect(client.execute({ mode: 'preview', input: 'b', plan: {} })).rejects.toThrow(
+      /disposed/i,
+    );
+  });
+
+  it('starting a new execution settles the previous as cancelled', async () => {
+    const workers: MockWorker[] = [];
+    const client = new TransformationWorkerClient(() => {
+      const worker = new MockWorker();
+      workers.push(worker);
+      return worker as unknown as Worker;
+    });
+    const first = client.execute({ mode: 'preview', input: 'a', plan: {} });
+    const second = client.execute({ mode: 'preview', input: 'b', plan: {} });
+    await expect(first).rejects.toBeInstanceOf(TransformationWorkerCancelledError);
+    const requestId = workers[1]!.posted[0]!.requestId;
+    workers[1]!.emit({
+      type: 'success',
+      requestId,
+      mode: 'preview',
+      result: successResult('second'),
+    });
+    await expect(second).resolves.toMatchObject({ ok: true, output: 'second' });
   });
 });

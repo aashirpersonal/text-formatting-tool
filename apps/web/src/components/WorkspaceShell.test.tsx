@@ -118,4 +118,52 @@ describe('WorkspaceShell local recipe workspace', () => {
     fireEvent.change(input, { target: { files: [file] } });
     expect(await screen.findByTestId('file-error')).toBeVisible();
   });
+
+  it('rejects oversized files before reading and keeps existing input', async () => {
+    const user = userEvent.setup();
+    render(<WorkspaceShell />);
+    await user.type(screen.getByTestId('document-input'), 'keep-me');
+    const input = screen.getByTestId('file-input');
+    const textFn = vi.fn(async () => 'should-not-load');
+    const file = {
+      name: 'huge.txt',
+      type: 'text/plain',
+      size: 10 * 1024 * 1024 + 1,
+      text: textFn,
+    } as unknown as File;
+    const { fireEvent } = await import('@testing-library/react');
+    fireEvent.change(input, { target: { files: [file] } });
+    expect(await screen.findByTestId('file-error')).toHaveTextContent(/10 MiB/i);
+    expect(textFn).not.toHaveBeenCalled();
+    expect(screen.getByTestId('document-input')).toHaveValue('keep-me');
+    expect(executeMock).not.toHaveBeenCalled();
+  });
+
+  it('invalidates preview and result when an operation field changes', async () => {
+    const user = userEvent.setup();
+    render(<WorkspaceShell />);
+    await user.type(screen.getByTestId('document-input'), 'a\nb\n');
+    const original = (screen.getByTestId('document-input') as HTMLTextAreaElement).value;
+    await user.click(screen.getByTestId('goto-recipe'));
+    await user.selectOptions(screen.getByTestId('add-operation'), 'replace.literal');
+    const card = screen.getByTestId(/operation-card-/);
+    const opId = card.getAttribute('data-testid')!.replace('operation-card-', '');
+    await user.type(screen.getByTestId(`field-find-${opId}`), 'a');
+    await user.type(screen.getByTestId(`field-replacement-${opId}`), 'b');
+    await user.click(screen.getByTestId('run-preview'));
+    await waitFor(() => expect(screen.getByTestId('preview-after')).toBeVisible());
+    await user.click(screen.getByTestId('run-full'));
+    await waitFor(() => expect(screen.getByTestId('result-output')).toBeVisible());
+
+    await user.click(screen.getByTestId('stage-recipe'));
+    await user.clear(screen.getByTestId(`field-replacement-${opId}`));
+    await user.type(screen.getByTestId(`field-replacement-${opId}`), 'c');
+
+    expect(screen.getByTestId('stage-result')).toBeDisabled();
+    await user.click(screen.getByTestId('stage-preview'));
+    expect(screen.queryByTestId('preview-after')).not.toBeInTheDocument();
+    expect(screen.getByTestId('run-full')).toBeDisabled();
+    await user.click(screen.getByTestId('stage-input'));
+    expect(screen.getByTestId('document-input')).toHaveValue(original);
+  });
 });

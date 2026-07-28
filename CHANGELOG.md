@@ -4,6 +4,12 @@ All notable changes to this project will be documented in this file.
 
 ## Unreleased
 
+### Fixed
+
+- Worker-client cancellation and dispose now settle the active execute Promise with a typed cancellation outcome (no hanging awaits).
+- Trailing whitespace in `docs/v2/LOCAL_WORKSPACE_V1.md` so `git diff --check` passes.
+- Stronger workspace tests: oversized-file rejection before read, recipe field invalidation, and Playwright order A/B result divergence.
+
 ### Added
 
 - Local manual recipe workspace with Input → Recipe → Preview → Result flow.

@@ -1,6 +1,6 @@
 # Local Workspace v1
 
-**Status:** Implemented on `v2-rebuild`  
+**Status:** Implemented on `v2-rebuild`
 **Date:** 2026-07-28
 
 ## Current manual workflow
@@ -41,6 +41,7 @@ Replace text · Trim each line · Remove empty lines · Remove duplicate lines �
 ## Cancellation model
 
 - Cancel terminates the active Worker and discards the active request ID.
+- The active `execute()` Promise settles with a typed client-level cancellation error (`WORKER_CANCELLED`), not an engine failure.
 - A fresh Worker is created for the next job.
 - Cancelled/stale responses cannot overwrite UI state.
 - Cancellation does not clear input or previous successful preview/result.

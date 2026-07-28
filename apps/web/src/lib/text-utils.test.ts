@@ -1,5 +1,5 @@
-import { describe, expect, it } from 'vitest';
-import { countCharacters, countLines, validatePlainTextFile } from './text-utils';
+import { describe, expect, it, vi } from 'vitest';
+import { MAX_INPUT_BYTES, countCharacters, countLines, validatePlainTextFile } from './text-utils';
 
 describe('text utilities', () => {
   it('counts Unicode characters safely', () => {
@@ -20,5 +20,21 @@ describe('text utilities', () => {
 
     const bad = validatePlainTextFile(new File(['x'], 'photo.png', { type: 'image/png' }));
     expect(bad.ok).toBe(false);
+  });
+
+  it('rejects oversized files before contents are read', () => {
+    const textFn = vi.fn(async () => 'should-not-load');
+    const file = {
+      name: 'huge.txt',
+      type: 'text/plain',
+      size: MAX_INPUT_BYTES + 1,
+      text: textFn,
+    } as unknown as File;
+    const result = validatePlainTextFile(file, MAX_INPUT_BYTES);
+    expect(result.ok).toBe(false);
+    if (!result.ok) {
+      expect(result.reason).toMatch(/larger than the 10 MiB/i);
+    }
+    expect(textFn).not.toHaveBeenCalled();
   });
 });

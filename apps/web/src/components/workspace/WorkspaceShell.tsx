@@ -22,7 +22,10 @@ import {
   type RecipeDraft,
 } from '@/recipes/recipe-draft';
 import { RECIPE_TEMPLATES, loadTemplatePlan } from '@/recipes/templates';
-import { TransformationWorkerClient } from '@/worker/transformation-worker-client';
+import {
+  TransformationWorkerClient,
+  isWorkerCancellation,
+} from '@/worker/transformation-worker-client';
 import { OperationCard } from './OperationCard';
 
 type Stage = 'input' | 'recipe' | 'preview' | 'result';
@@ -41,6 +44,7 @@ type PreviewState = {
 
 export function WorkspaceShell() {
   const workerRef = useRef<TransformationWorkerClient | null>(null);
+  const runIdRef = useRef(0);
   const [stage, setStage] = useState<Stage>('input');
   const [text, setText] = useState('');
   const [originalText, setOriginalText] = useState('');
@@ -57,6 +61,7 @@ export function WorkspaceShell() {
   useEffect(() => {
     workerRef.current = new TransformationWorkerClient();
     return () => {
+      runIdRef.current += 1;
       workerRef.current?.dispose();
       workerRef.current = null;
     };
@@ -208,6 +213,7 @@ export function WorkspaceShell() {
     if (!validation.ok) {
       return;
     }
+    const runId = ++runIdRef.current;
     const sample = buildPreviewSample(text);
     setStatus('preparing');
     setStatusMessage('Preparing local preview…');
@@ -221,6 +227,9 @@ export function WorkspaceShell() {
         input: sample.text,
         plan: validation.plan,
       });
+      if (runId !== runIdRef.current) {
+        return;
+      }
       if (!result.ok) {
         setStatus('failed');
         setPreview(null);
@@ -240,6 +249,14 @@ export function WorkspaceShell() {
           : 'Preview completed on the full input.',
       );
     } catch (error) {
+      if (runId !== runIdRef.current) {
+        return;
+      }
+      if (isWorkerCancellation(error)) {
+        setStatus('cancelled');
+        setStatusMessage('Processing cancelled. Previous successful preview/result were kept.');
+        return;
+      }
       setStatus('failed');
       setPreview(null);
       setErrorMessage(error instanceof Error ? error.message : 'Preview failed unexpectedly.');
@@ -251,6 +268,7 @@ export function WorkspaceShell() {
     if (!validation.ok || !preview) {
       return;
     }
+    const runId = ++runIdRef.current;
     setStatus('preparing');
     setStatusMessage('Preparing full local processing…');
     setErrorMessage(null);
@@ -263,6 +281,9 @@ export function WorkspaceShell() {
         input: text,
         plan: validation.plan,
       });
+      if (runId !== runIdRef.current) {
+        return;
+      }
       if (!result.ok) {
         setStatus('failed');
         setFullResult(null);
@@ -274,6 +295,14 @@ export function WorkspaceShell() {
       setStatus('completed');
       setStatusMessage('Full local processing completed.');
     } catch (error) {
+      if (runId !== runIdRef.current) {
+        return;
+      }
+      if (isWorkerCancellation(error)) {
+        setStatus('cancelled');
+        setStatusMessage('Processing cancelled. Previous successful preview/result were kept.');
+        return;
+      }
       setStatus('failed');
       setFullResult(null);
       setErrorMessage(
@@ -284,8 +313,10 @@ export function WorkspaceShell() {
   }
 
   function cancelProcessing() {
+    runIdRef.current += 1;
     workerRef.current?.cancel();
     setStatus('cancelled');
+    setErrorMessage(null);
     setStatusMessage('Processing cancelled. Previous successful preview/result were kept.');
   }
 
