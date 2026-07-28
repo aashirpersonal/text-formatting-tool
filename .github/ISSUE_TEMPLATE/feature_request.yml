@@ -1,0 +1,32 @@
+name: Feature request
+description: Propose a capability aligned with the v2 blueprint
+title: '[feature] '
+labels: ['enhancement']
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Feature ideas should fit docs/v2/PRODUCT_BLUEPRINT.md. Requests for executing model-generated JavaScript will be declined.
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problem
+      description: What user problem does this address?
+    validations:
+      required: true
+  - type: textarea
+    id: proposal
+    attributes:
+      label: Proposal
+      description: Describe the desired behaviour without assuming implementation details.
+    validations:
+      required: true
+  - type: checkboxes
+    id: constraints
+    attributes:
+      label: Constraints acknowledged
+      options:
+        - label: This does not require executing model-generated code
+          required: true
+        - label: This does not require shipping API keys to the browser
+          required: true

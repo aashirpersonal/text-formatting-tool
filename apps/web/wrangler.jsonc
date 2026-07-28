@@ -1,0 +1,24 @@
+/**
+ * For more details on how to configure Wrangler, refer to:
+ * https://developers.cloudflare.com/workers/wrangler/configuration/
+ *
+ * Derived from the official OpenNext Cloudflare Next.js template
+ * (opennextjs/opennextjs-cloudflare create-cloudflare/next).
+ */
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "text-formatting-tool",
+  "main": ".open-next/worker.js",
+  "compatibility_date": "2026-07-28",
+  "compatibility_flags": ["nodejs_compat", "global_fetch_strictly_public"],
+  "assets": {
+    "binding": "ASSETS",
+    "directory": ".open-next/assets",
+  },
+  "services": [
+    {
+      "binding": "WORKER_SELF_REFERENCE",
+      "service": "text-formatting-tool",
+    },
+  ],
+}

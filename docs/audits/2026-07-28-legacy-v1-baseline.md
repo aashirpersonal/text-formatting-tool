@@ -1,14 +1,14 @@
 # Legacy v1 baseline audit
 
-| Field | Value |
-|-------|--------|
-| Repository | https://github.com/aashirpersonal/text-formatting-tool |
-| Branch inspected | `master` |
-| Commit inspected | `8d3fa8c449aaccefb0071d2820b3b84b05c4fa68` (`8d3fa8c`) — *Update Dashboard.js* |
-| Default remote branch | `master` (`origin/HEAD` → `origin/master`) |
-| Other remote branch | `main` at `b7d0ebc` (stub README only; not the application tip) |
-| Audit date | 2026-07-28 |
-| Auditor context | Local reproduction after empty workspace; no OpenAI key supplied; no live model calls |
+| Field                 | Value                                                                                 |
+| --------------------- | ------------------------------------------------------------------------------------- |
+| Repository            | https://github.com/aashirpersonal/text-formatting-tool                                |
+| Branch inspected      | `master`                                                                              |
+| Commit inspected      | `8d3fa8c449aaccefb0071d2820b3b84b05c4fa68` (`8d3fa8c`) — _Update Dashboard.js_        |
+| Default remote branch | `master` (`origin/HEAD` → `origin/master`)                                            |
+| Other remote branch   | `main` at `b7d0ebc` (stub README only; not the application tip)                       |
+| Audit date            | 2026-07-28                                                                            |
+| Auditor context       | Local reproduction after empty workspace; no OpenAI key supplied; no live model calls |
 
 **Status:** This document describes **legacy v1**. It is **not approved for public redeployment**.
 
@@ -26,19 +26,19 @@ The documented Heroku homepage was unreachable at audit time (`404 No such app`)
 
 ## 2. Framework and dependency facts
 
-| Item | Observed value |
-|------|----------------|
-| Package name / version | `text-formatting-tool` `0.1.0` (`private: true`) |
-| UI framework | React `18.2.0` + React DOM `18.2.0` |
-| Scaffold | `react-scripts` `5.0.1` (Create React App) |
-| Routing | `react-router-dom` `6.22.3` |
-| AI SDK | `openai` `4.53.2` |
-| Other runtime deps | `react-helmet` `6.1.0`, `react-icons` `5.0.1`, `react-split` `2.0.14`, `web-vitals` `2.1.4` |
-| CSS tooling | Tailwind CSS `3.4.1`, PostCSS `8.4.36`, Autoprefixer `10.4.18` |
-| Lockfile | `package-lock.json` lockfileVersion **3** |
-| `engines` field | **Absent** |
-| Package manager used for baseline | **npm** (lockfile-implied); Node `v24.12.0`, npm `11.6.2` |
-| Licence file | **Missing** (README claims MIT; GitHub API reported `license: null`) |
+| Item                              | Observed value                                                                              |
+| --------------------------------- | ------------------------------------------------------------------------------------------- |
+| Package name / version            | `text-formatting-tool` `0.1.0` (`private: true`)                                            |
+| UI framework                      | React `18.2.0` + React DOM `18.2.0`                                                         |
+| Scaffold                          | `react-scripts` `5.0.1` (Create React App)                                                  |
+| Routing                           | `react-router-dom` `6.22.3`                                                                 |
+| AI SDK                            | `openai` `4.53.2`                                                                           |
+| Other runtime deps                | `react-helmet` `6.1.0`, `react-icons` `5.0.1`, `react-split` `2.0.14`, `web-vitals` `2.1.4` |
+| CSS tooling                       | Tailwind CSS `3.4.1`, PostCSS `8.4.36`, Autoprefixer `10.4.18`                              |
+| Lockfile                          | `package-lock.json` lockfileVersion **3**                                                   |
+| `engines` field                   | **Absent**                                                                                  |
+| Package manager used for baseline | **npm** (lockfile-implied); Node `v24.12.0`, npm `11.6.2`                                   |
+| Licence file                      | **Missing** (README claims MIT; GitHub API reported `license: null`)                        |
 
 ---
 
@@ -71,14 +71,14 @@ The documented Heroku homepage was unreachable at audit time (`404 No such app`)
 
 ## 4. Critical security findings
 
-| ID | Finding | Severity |
-|----|---------|----------|
-| SEC-01 | Model-generated JavaScript executed via `new Function` on the main thread (`src/components/AIAssistant.js`) | Critical |
+| ID     | Finding                                                                                                                                                            | Severity |
+| ------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------ | -------- |
+| SEC-01 | Model-generated JavaScript executed via `new Function` on the main thread (`src/components/AIAssistant.js`)                                                        | Critical |
 | SEC-02 | OpenAI client constructed in the browser with `dangerouslyAllowBrowser: true` and `process.env.REACT_APP_OPENAI_API_KEY` (CRA inlines `REACT_APP_*` at build time) | Critical |
-| SEC-03 | Prompt injection into generated code (instruction + sample interpolated into the prompt; no allowlist) | High |
-| SEC-04 | Privacy Policy claims no data leaves the device and no third-party services, contradicting the OpenAI browser path | High |
-| SEC-05 | User-supplied regex in Replace Text can cause ReDoS on the main thread | Medium |
-| SEC-06 | No execution timeout, worker isolation, or memory/operation limits for generated code | High |
+| SEC-03 | Prompt injection into generated code (instruction + sample interpolated into the prompt; no allowlist)                                                             | High     |
+| SEC-04 | Privacy Policy claims no data leaves the device and no third-party services, contradicting the OpenAI browser path                                                 | High     |
+| SEC-05 | User-supplied regex in Replace Text can cause ReDoS on the main thread                                                                                             | Medium   |
+| SEC-06 | No execution timeout, worker isolation, or memory/operation limits for generated code                                                                              | High     |
 
 **Reproduction note (build artefact, no secret values):** After `npm run build` with **no** API key in the environment, `build/static/js/main.*.js` still contained `dangerouslyAllowBrowser` and `api.openai.com`. No hardcoded `sk-…` secret patterns were found in the bundle. A non-empty key at build time would be embedded in client JavaScript.
 
@@ -119,13 +119,13 @@ In `src/components/AIAssistant.js` (legacy):
 
 ## 8. Deployment status
 
-| Item | Status |
-|------|--------|
-| GitHub homepage field | `https://text-formatting-tool-6722790c2678.herokuapp.com/` |
-| Probe on 2026-07-28 | HTTP 404 — Heroku “No such app” |
-| `Procfile` / server entry | Not present in tree |
-| GitHub Actions | Not present |
-| Sitemap hostname | `https://textformat.io/` (domain status not established in this baseline) |
+| Item                      | Status                                                                    |
+| ------------------------- | ------------------------------------------------------------------------- |
+| GitHub homepage field     | `https://text-formatting-tool-6722790c2678.herokuapp.com/`                |
+| Probe on 2026-07-28       | HTTP 404 — Heroku “No such app”                                           |
+| `Procfile` / server entry | Not present in tree                                                       |
+| GitHub Actions            | Not present                                                               |
+| Sitemap hostname          | `https://textformat.io/` (domain status not established in this baseline) |
 
 ---
 
@@ -139,15 +139,15 @@ Host: macOS; Node `v24.12.0`; npm `11.6.2`. Working directory after fetch/checko
 npm ci
 ```
 
-| Result | Value |
-|--------|--------|
-| Exit code | **0** |
-| Outcome | Added 1522 packages; audited 1523 packages in ~58s |
-| Lockfile hash before/after | `f3fccb0a73eb3cd15372015935064249421caa14` — **unchanged** |
-| Tracked files changed | **None** |
-| Reproducible with lockfile? | **Yes** for install on this host (lockfile not rewritten) |
-| Warnings | Multiple deprecation warnings (workbox, svgo, babel proposal plugins, etc.); npm also warned about unknown config `devdir` from the environment |
-| Audit summary printed by `npm ci` | 70 vulnerabilities (15 low, 17 moderate, 35 high, 3 critical) |
+| Result                            | Value                                                                                                                                           |
+| --------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------- |
+| Exit code                         | **0**                                                                                                                                           |
+| Outcome                           | Added 1522 packages; audited 1523 packages in ~58s                                                                                              |
+| Lockfile hash before/after        | `f3fccb0a73eb3cd15372015935064249421caa14` — **unchanged**                                                                                      |
+| Tracked files changed             | **None**                                                                                                                                        |
+| Reproducible with lockfile?       | **Yes** for install on this host (lockfile not rewritten)                                                                                       |
+| Warnings                          | Multiple deprecation warnings (workbox, svgo, babel proposal plugins, etc.); npm also warned about unknown config `devdir` from the environment |
+| Audit summary printed by `npm ci` | 70 vulnerabilities (15 low, 17 moderate, 35 high, 3 critical)                                                                                   |
 
 **Limitation:** Create React App 5 is unmaintained and was not designed for Node 24. Install succeeded here but is not a guarantee for all environments.
 
@@ -157,13 +157,13 @@ npm ci
 CI=true npm run build
 ```
 
-| Result | Value |
-|--------|--------|
-| Exit code | **0** |
-| Outcome | “Compiled successfully.” |
-| Artefacts | `build/` (~3.4M); main JS ~94.35 kB gzip; CSS ~3.89 kB gzip |
-| Tracked files changed | **None** (`build/` is gitignored) |
-| Warnings | `fs.F_OK` deprecation (Node); outdated `caniuse-lite`; CRA/`babel-preset-react-app` unmaintained notice about `@babel/plugin-proposal-private-property-in-object` |
+| Result                | Value                                                                                                                                                             |
+| --------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Exit code             | **0**                                                                                                                                                             |
+| Outcome               | “Compiled successfully.”                                                                                                                                          |
+| Artefacts             | `build/` (~3.4M); main JS ~94.35 kB gzip; CSS ~3.89 kB gzip                                                                                                       |
+| Tracked files changed | **None** (`build/` is gitignored)                                                                                                                                 |
+| Warnings              | `fs.F_OK` deprecation (Node); outdated `caniuse-lite`; CRA/`babel-preset-react-app` unmaintained notice about `@babel/plugin-proposal-private-property-in-object` |
 
 **Missing env:** Build succeeded without `REACT_APP_OPENAI_API_KEY`. AI calls would fail at runtime without a key; the unsafe client code remains in the bundle.
 
@@ -175,12 +175,12 @@ Default non-interactive CRA invocation:
 CI=true npm test -- --watchAll=false
 ```
 
-| Result | Value |
-|--------|--------|
-| Exit code | **1** |
-| Outcome | `No tests found, exiting with code 1` |
-| Matches | 0 test files under `src/**/*.{spec,test}.{js,jsx,ts,tsx}` and `__tests__` |
-| Files changed | **None** |
+| Result        | Value                                                                     |
+| ------------- | ------------------------------------------------------------------------- |
+| Exit code     | **1**                                                                     |
+| Outcome       | `No tests found, exiting with code 1`                                     |
+| Matches       | 0 test files under `src/**/*.{spec,test}.{js,jsx,ts,tsx}` and `__tests__` |
+| Files changed | **None**                                                                  |
 
 Informational (not the primary reported result):
 
@@ -192,12 +192,12 @@ Exit code **0** with message `No tests found` — confirms absence of tests rath
 
 ### 9.4 Lint
 
-| Result | Value |
-|--------|--------|
-| Dedicated `lint` script in `package.json` | **None** |
-| Available scripts | `start`, `build`, `test`, `eject` |
-| Action taken | **No lint command run** (none exists) |
-| Note | `eslintConfig` extends `react-app` / `react-app/jest` for CRA defaults only |
+| Result                                    | Value                                                                       |
+| ----------------------------------------- | --------------------------------------------------------------------------- |
+| Dedicated `lint` script in `package.json` | **None**                                                                    |
+| Available scripts                         | `start`, `build`, `test`, `eject`                                           |
+| Action taken                              | **No lint command run** (none exists)                                       |
+| Note                                      | `eslintConfig` extends `react-app` / `react-app/jest` for CRA defaults only |
 
 ### 9.5 Dependency audit
 
@@ -205,12 +205,12 @@ Exit code **0** with message `No tests found` — confirms absence of tests rath
 npm audit
 ```
 
-| Result | Value |
-|--------|--------|
-| Exit code | **1** (vulnerabilities reported) |
-| Totals | **70** (15 low, 17 moderate, 35 high, **3 critical**) |
-| Critical package names (audit report) | `form-data`, `shell-quote`, `websocket-driver` |
-| Files / lockfile changed | **None** (audit is read-only; `npm audit fix` was **not** run) |
+| Result                                | Value                                                          |
+| ------------------------------------- | -------------------------------------------------------------- |
+| Exit code                             | **1** (vulnerabilities reported)                               |
+| Totals                                | **70** (15 low, 17 moderate, 35 high, **3 critical**)          |
+| Critical package names (audit report) | `form-data`, `shell-quote`, `websocket-driver`                 |
+| Files / lockfile changed              | **None** (audit is read-only; `npm audit fix` was **not** run) |
 
 Many findings are transitive through the unmaintained CRA / webpack-dev-server toolchain. This reinforces retiring CRA for v2 rather than patching legacy in place.
 

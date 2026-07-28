@@ -1,94 +1,90 @@
-# Text Formatting Tool
+# Text Formatting Tool (v2)
 
-**The most advanced text formatting tool built with React**
+**Status:** Active rebuild on branch `v2-rebuild`. Legacy Create React App v1 is preserved in Git history and tagged `legacy-v1`.
 
-**See it Live [https://text-formatting-tool-6722790c2678.herokuapp.com/](https://text-formatting-tool-6722790c2678.herokuapp.com/)**
+## Product architecture
 
+Text Formatting Tool is intended to become an AI-guided, deterministic, privacy-conscious large-text transformation product:
 
-![screely-1721844509954](https://github.com/user-attachments/assets/d02eba69-5e8d-4e47-b17a-5dd883e6c3e3)
-![screely-1721844587251](https://github.com/user-attachments/assets/cff894e5-9ee8-47c3-af48-79b39e727c2f)
+1. You describe a deterministic transformation in plain English.
+2. You review representative samples (and may redact them).
+3. Only the instruction and approved samples are intended to leave the browser for recipe authoring.
+4. The model returns a validated JSON transformation recipe — **never executable JavaScript**.
+5. A trusted browser-local engine applies the recipe to the complete document.
 
-## Table of Contents
-- [Introduction](#introduction)
-- [Features](#features)
-- [Installation](#installation)
-- [Usage](#usage)
-- [Scripts](#scripts)
-- [Contributing](#contributing)
-- [License](#license)
+This repository currently contains a **scaffold**. AI recipe generation and the transformation engine are **not implemented yet**.
 
-## Introduction
+## Repository structure
 
-The Text Formatting Tool is a powerful and intuitive web application designed to simplify text formatting tasks. Built with React, this tool offers a variety of formatting options to help users style their text efficiently and effectively.
+```text
+apps/web/                         Next.js App Router product shell (Cloudflare OpenNext)
+packages/transformation-schema/   Future TransformationPlan schema (placeholder)
+packages/transformation-engine/   Trusted engine foundation (explicitly not implemented)
+docs/audits/                      Legacy baseline audit
+docs/v2/                          Product blueprint and ADRs
+docs/evidence/                    Evidence register
+```
 
-## Features
+## Implemented now
 
-- **Real-time Text Formatting:** See changes as you make them.
-- **Multiple Formatting Options:** Includes bold, italics, underline, strikethrough, and more.
-- **User-friendly Interface:** Easy to use with a clean, responsive design.
-- **Customizable:** Easily extendable with additional features.
+- Landing, workspace, privacy, and about routes
+- Local text input with character/line counts, clear, and plain-text file load
+- Honest UI states that recipe generation is unavailable
+- Package placeholders with typed `not_implemented` contracts
+- Lint, format, typecheck, unit/component tests, Playwright Chromium smoke, CI workflow
+- Cloudflare OpenNext Worker build configuration (not deployed from this milestone)
 
-## Installation
+## Planned (not in this scaffold)
 
-To set up the project locally, follow these steps:
+- Server-side OpenAI integration with secrets kept off the client
+- Schema-constrained recipe generation
+- Allowlisted operations and Web Worker execution
+- Preview/diff, progress, cancellation, bounded history, recipe export
 
-1. **Clone the repository:**
-   ```bash
-   git clone https://github.com/aashirpersonal/text-formatting-tool.git
-   cd text-formatting-tool
-   ```
+See:
 
-2. **Install dependencies:**
-   ```bash
-   npm install
-   ```
+- [`docs/v2/PRODUCT_BLUEPRINT.md`](docs/v2/PRODUCT_BLUEPRINT.md)
+- [`docs/v2/ARCHITECTURE_DECISIONS.md`](docs/v2/ARCHITECTURE_DECISIONS.md)
+- [`docs/audits/2026-07-28-legacy-v1-baseline.md`](docs/audits/2026-07-28-legacy-v1-baseline.md)
+- Legacy tag: `legacy-v1` → commit `8d3fa8c`
 
-## Usage
+## Requirements
 
-To start using the text formatting tool locally:
+- Node.js 24 LTS (see `.nvmrc`; `engines.node` allows `>=24.12.0 <25`)
+- npm 11+ (lockfile-managed via npm workspaces)
 
-1. **Run the development server:**
-   ```bash
-   npm start
-   ```
+## Setup
 
-   Open [http://localhost:3000](http://localhost:3000) to view it in your browser. The page will reload when you make changes.
+```bash
+git checkout v2-rebuild
+nvm use
+npm ci
+npm run dev
+```
 
-2. **Build for production:**
-   ```bash
-   npm run build
-   ```
+Open [http://localhost:3000](http://localhost:3000).
 
-   This will build the app for production to the `build` folder. It correctly bundles React in production mode and optimizes the build for the best performance.
+## Commands
 
-## Scripts
+| Command                | Purpose                                          |
+| ---------------------- | ------------------------------------------------ |
+| `npm run dev`          | Next.js development server                       |
+| `npm run build`        | Next.js production build                         |
+| `npm run cf-build`     | OpenNext Cloudflare Worker build                 |
+| `npm run preview`      | Build and preview on the Workers runtime locally |
+| `npm run lint`         | ESLint / package type lint scripts               |
+| `npm run format:check` | Prettier check                                   |
+| `npm run typecheck`    | TypeScript across workspaces                     |
+| `npm run test`         | Vitest unit/component tests                      |
+| `npm run test:e2e`     | Playwright smoke (requires Chromium install)     |
+| `npm run ci`           | Aggregate local CI checks                        |
 
-In the project directory, you can run the following scripts:
+## Security notes
 
-- **`npm start`**: Runs the app in the development mode.
-- **`npm test`**: Launches the test runner in the interactive watch mode.
-- **`npm run build`**: Builds the app for production.
-- **`npm run eject`**: Removes the single build dependency from your project.
+- No OpenAI API key is required or accepted by this scaffold.
+- Do not reintroduce browser `dangerouslyAllowBrowser` OpenAI clients.
+- Report vulnerabilities via GitHub private advisories when available (see `SECURITY.md`).
 
-## Contributing
+## Licence
 
-Contributions are welcome! Please open an issue or submit a pull request with any changes.
-
-1. **Fork the repository.**
-2. **Create a new branch:**
-   ```bash
-   git checkout -b feature-branch
-   ```
-3. **Commit your changes:**
-   ```bash
-   git commit -m 'Add some feature'
-   ```
-4. **Push to the branch:**
-   ```bash
-   git push origin feature-branch
-   ```
-5. **Open a pull request.**
-
-## License
-
-This project is licensed under the MIT License. See the [LICENSE](LICENSE) file for more information.
+MIT — see `LICENSE`.

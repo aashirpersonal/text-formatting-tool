@@ -1,45 +1,32 @@
 {
   "name": "text-formatting-tool",
-  "version": "0.1.0",
+  "version": "2.0.0-alpha.0",
   "private": true,
-  "dependencies": {
-    "openai": "^4.53.2",
-    "react": "^18.2.0",
-    "react-dom": "^18.2.0",
-    "react-helmet": "^6.1.0",
-    "react-icons": "^5.0.1",
-    "react-router-dom": "^6.22.3",
-    "react-scripts": "5.0.1",
-    "react-split": "^2.0.14",
-    "web-vitals": "^2.1.4"
+  "description": "AI-guided deterministic text transformation tool (v2 scaffold)",
+  "license": "MIT",
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
+  "engines": {
+    "node": ">=24.12.0 <25"
   },
+  "packageManager": "npm@11.16.0",
   "scripts": {
-    "start": "react-scripts start",
-    "build": "react-scripts build",
-    "test": "react-scripts test",
-    "eject": "react-scripts eject"
-  },
-  "eslintConfig": {
-    "extends": [
-      "react-app",
-      "react-app/jest"
-    ]
-  },
-  "browserslist": {
-    "production": [
-      ">0.2%",
-      "not dead",
-      "not op_mini all"
-    ],
-    "development": [
-      "last 1 chrome version",
-      "last 1 firefox version",
-      "last 1 safari version"
-    ]
+    "dev": "npm run dev -w @tft/web",
+    "build": "npm run build -w @tft/web",
+    "preview": "npm run preview -w @tft/web",
+    "cf-build": "npm run cf-build -w @tft/web",
+    "lint": "npm run lint -w @tft/web && npm run lint -w @tft/transformation-schema && npm run lint -w @tft/transformation-engine",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
+    "typecheck": "npm run typecheck -w @tft/transformation-schema && npm run typecheck -w @tft/transformation-engine && npm run typecheck -w @tft/web",
+    "test": "npm run test -w @tft/transformation-schema && npm run test -w @tft/transformation-engine && npm run test -w @tft/web",
+    "test:e2e": "npm run test:e2e -w @tft/web",
+    "ci": "npm run format:check && npm run lint && npm run typecheck && npm run test && npm run build && npm run cf-build"
   },
   "devDependencies": {
-    "autoprefixer": "^10.4.18",
-    "postcss": "^8.4.36",
-    "tailwindcss": "^3.4.1"
+    "prettier": "^3.9.6",
+    "typescript": "^5.7.4"
   }
 }

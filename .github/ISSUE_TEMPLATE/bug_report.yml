@@ -1,0 +1,31 @@
+name: Bug report
+description: Report a defect in the current v2 scaffold or tooling
+title: '[bug] '
+labels: ['bug']
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Please do not include secrets, API keys, or private document contents.
+  - type: textarea
+    id: description
+    attributes:
+      label: Description
+      description: What went wrong?
+    validations:
+      required: true
+  - type: textarea
+    id: steps
+    attributes:
+      label: Steps to reproduce
+    validations:
+      required: true
+  - type: input
+    id: version
+    attributes:
+      label: Branch / commit
+      placeholder: v2-rebuild @ <sha>
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected behaviour

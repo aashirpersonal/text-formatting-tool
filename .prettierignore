@@ -1,0 +1,12 @@
+node_modules
+.next
+.open-next
+.wrangler
+coverage
+dist
+build
+playwright-report
+test-results
+package-lock.json
+*.tsbuildinfo
+cloudflare-env.d.ts

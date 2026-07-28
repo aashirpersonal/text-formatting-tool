@@ -1,7 +1,7 @@
 # Product blueprint — text transformation tool (v2)
 
-**Status:** Approved product direction (documentation only; application not yet scaffolded).  
-**Date:** 2026-07-28  
+**Status:** Approved product direction. Application scaffold exists on `v2-rebuild`; AI integration and the transformation engine are not yet implemented.
+**Date:** 2026-07-28
 **Related:** `docs/v2/ARCHITECTURE_DECISIONS.md`, `docs/audits/2026-07-28-legacy-v1-baseline.md`, `docs/evidence/EVIDENCE_REGISTER.md`
 
 ---
@@ -30,15 +30,15 @@ In the intended product:
 
 Practical audiences include:
 
-| Audience | Example needs |
-|----------|----------------|
-| Developers | Cleaning logs, normalizing generated output, reshaping fixture dumps |
-| Analysts | Cleaning exported CSVs/pasted tables before spreadsheet or BI import |
-| Researchers | Standardising text collections, reference lists, repeated field formats |
-| Ecommerce / operations | Cleaning product titles, SKUs, order notes, inventory lists |
-| Administrators | Processing repetitive line lists, access logs excerpts, directory exports |
-| Students / educators | Transforming structured notes, bibliographies, assignment corpora |
-| Content teams | Predictable format conversions (delimiters, headings, repeated labels)—not creative rewriting |
+| Audience               | Example needs                                                                                 |
+| ---------------------- | --------------------------------------------------------------------------------------------- |
+| Developers             | Cleaning logs, normalizing generated output, reshaping fixture dumps                          |
+| Analysts               | Cleaning exported CSVs/pasted tables before spreadsheet or BI import                          |
+| Researchers            | Standardising text collections, reference lists, repeated field formats                       |
+| Ecommerce / operations | Cleaning product titles, SKUs, order notes, inventory lists                                   |
+| Administrators         | Processing repetitive line lists, access logs excerpts, directory exports                     |
+| Students / educators   | Transforming structured notes, bibliographies, assignment corpora                             |
+| Content teams          | Predictable format conversions (delimiters, headings, repeated labels)—not creative rewriting |
 
 The product optimises for **rule-like, inspectable transforms** on **large** text, not open-ended generative editing.
 
@@ -97,22 +97,22 @@ When a request cannot be mapped to allowlisted operations with clear semantics, 
 
 Must-have for a credible v2 MVP:
 
-| Priority | Feature |
-|----------|---------|
-| P0 | Paste and file input (text-oriented formats first) |
-| P0 | Intelligent sampling with user approval / redaction |
-| P0 | Explicit data disclosure before network calls |
-| P0 | JSON recipe generation (schema-constrained model output) |
-| P0 | Allowlisted operations + server and client schema validation |
-| P0 | Recipe explanation and basic recipe editor |
-| P0 | Sample preview + visual diff |
-| P0 | Web Worker execution of the trusted engine |
-| P0 | Progress and cancellation |
-| P0 | Bounded history and original preservation |
-| P0 | Export of result and data-free recipe |
-| P1 | Accessible, responsive UI |
-| P1 | Operation limits and structured error reporting |
-| P1 | Restricted regex operation design (high-risk) |
+| Priority | Feature                                                      |
+| -------- | ------------------------------------------------------------ |
+| P0       | Paste and file input (text-oriented formats first)           |
+| P0       | Intelligent sampling with user approval / redaction          |
+| P0       | Explicit data disclosure before network calls                |
+| P0       | JSON recipe generation (schema-constrained model output)     |
+| P0       | Allowlisted operations + server and client schema validation |
+| P0       | Recipe explanation and basic recipe editor                   |
+| P0       | Sample preview + visual diff                                 |
+| P0       | Web Worker execution of the trusted engine                   |
+| P0       | Progress and cancellation                                    |
+| P0       | Bounded history and original preservation                    |
+| P0       | Export of result and data-free recipe                        |
+| P1       | Accessible, responsive UI                                    |
+| P1       | Operation limits and structured error reporting              |
+| P1       | Restricted regex operation design (high-risk)                |
 
 ---
 
@@ -134,13 +134,13 @@ After the core engine and trust model are proven:
 
 ## H. Product differentiation
 
-| Not this | Why v2 differs |
-|----------|----------------|
-| A regex generator | Regex is one high-risk allowlisted op inside a broader validated plan, with preview and limits—not the product identity |
-| A normal AI text editor | Full document stays local; model sees samples only; output is a recipe, not rewritten prose |
-| An LLM chunking wrapper | We do not stream the whole corpus through a model to “transform” it |
-| A local LLM application | Cloud model may assist recipe authoring; execution is a trusted deterministic engine |
-| A collection of basic formatting buttons | Buttons may remain as shortcuts that emit plans; the core asset is the recipe + engine + privacy boundary |
+| Not this                                 | Why v2 differs                                                                                                          |
+| ---------------------------------------- | ----------------------------------------------------------------------------------------------------------------------- |
+| A regex generator                        | Regex is one high-risk allowlisted op inside a broader validated plan, with preview and limits—not the product identity |
+| A normal AI text editor                  | Full document stays local; model sees samples only; output is a recipe, not rewritten prose                             |
+| An LLM chunking wrapper                  | We do not stream the whole corpus through a model to “transform” it                                                     |
+| A local LLM application                  | Cloud model may assist recipe authoring; execution is a trusted deterministic engine                                    |
+| A collection of basic formatting buttons | Buttons may remain as shortcuts that emit plans; the core asset is the recipe + engine + privacy boundary               |
 
 **One-line positioning:** AI helps author an inspectable transformation plan; a trusted local engine applies it at scale.
 
