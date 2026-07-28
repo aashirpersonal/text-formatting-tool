@@ -83,6 +83,15 @@ export function SimpleAppShell() {
     };
   }, []);
 
+  useEffect(() => {
+    const openExamples = () => {
+      setExamplesOpen(true);
+      instructionRef.current?.focus();
+    };
+    window.addEventListener('tft:open-examples', openExamples);
+    return () => window.removeEventListener('tft:open-examples', openExamples);
+  }, []);
+
   const characters = useMemo(() => countCharacters(text), [text]);
   const lines = useMemo(() => countLines(text), [text]);
   const bytes = useMemo(() => countUtf8Bytes(text), [text]);
@@ -375,20 +384,21 @@ export function SimpleAppShell() {
 
   const friendlyPreview = preview ? summarizeExecution(preview.result) : [];
   const friendlyResult = fullResult ? summarizeExecution(fullResult) : [];
-  const featuredExamples = EXAMPLE_PROMPTS.slice(0, 3);
-  const moreExamples = EXAMPLE_PROMPTS.slice(3);
+  const featuredExamples = EXAMPLE_PROMPTS.slice(0, 2);
+  const moreExamples = EXAMPLE_PROMPTS.slice(2);
+  const canRestore = originalText.length > 0 && text !== originalText;
+  const fileLimitLabel = formatBytes(MAX_INPUT_BYTES);
 
   const composer = (
-    <div className="composer" data-testid="instruction-composer">
+    <div className="composer composer-card" data-testid="instruction-composer">
       <div className="composer-header">
         <label htmlFor="instruction-input">What should change?</label>
-        <span className="composer-hint muted">Prototype examples only · ⌘/Ctrl+Enter</span>
       </div>
       <textarea
         id="instruction-input"
         ref={instructionRef}
         className="textarea composer-input"
-        rows={2}
+        rows={3}
         value={instruction}
         onChange={(event) => {
           setInstruction(event.target.value);
@@ -404,7 +414,7 @@ export function SimpleAppShell() {
             void generateTransformation();
           }
         }}
-        placeholder="Example: Remove duplicate lines, trim extra spaces and sort the list alphabetically."
+        placeholder="Remove duplicate lines, trim extra spaces, and sort the list alphabetically…"
         data-testid="instruction-input"
       />
       <div
@@ -412,9 +422,8 @@ export function SimpleAppShell() {
         className="example-featured"
         data-testid="example-featured"
         role="group"
-        aria-label="Recommended examples"
+        aria-label="Suggested examples"
       >
-        <span className="example-label">Try:</span>
         {featuredExamples.map((example) => (
           <button
             key={example.id}
@@ -427,18 +436,23 @@ export function SimpleAppShell() {
           </button>
         ))}
       </div>
-      <div className="composer-actions">
-        <button
-          type="button"
-          className="button button-secondary button-compact"
-          aria-expanded={examplesOpen}
-          aria-controls="examples-menu"
-          onClick={() => setExamplesOpen((value) => !value)}
-          data-testid="examples-toggle"
-        >
-          Examples
-          <ChevronDown size={16} aria-hidden />
-        </button>
+      <div className="composer-footer">
+        <div className="composer-footer-left">
+          <button
+            type="button"
+            className="button button-secondary button-compact"
+            aria-expanded={examplesOpen}
+            aria-controls="examples-menu"
+            onClick={() => setExamplesOpen((value) => !value)}
+            data-testid="examples-toggle"
+          >
+            Examples
+            <ChevronDown size={16} aria-hidden />
+          </button>
+          <span className="composer-proto muted" data-testid="composer-prototype-hint">
+            Prototype mode · ⌘/Ctrl+Enter
+          </span>
+        </div>
         <button
           type="button"
           className={
@@ -462,7 +476,7 @@ export function SimpleAppShell() {
       <div
         id="examples-menu"
         className={examplesOpen ? 'example-menu is-open' : 'example-menu'}
-        role="group"
+        role="menu"
         aria-label="More example transformations"
         hidden={!examplesOpen}
         data-testid="examples-menu"
@@ -471,7 +485,8 @@ export function SimpleAppShell() {
           <button
             key={example.id}
             type="button"
-            className="chip"
+            role="menuitem"
+            className="example-menu-item"
             data-testid={`example-${example.id}`}
             onClick={() => loadExample(example.instruction)}
           >
@@ -493,18 +508,34 @@ export function SimpleAppShell() {
       aria-labelledby="your-text-heading"
       data-testid="source-pane"
     >
-      <div className="pane-header">
-        <h2 id="your-text-heading">Your text</h2>
+      <div className="pane-header source-header">
+        <div className="source-heading-group">
+          <h2 id="your-text-heading">Your text</h2>
+          {fileMeta ? (
+            <span className="filename-stat" data-testid="file-meta" title={fileMeta.name}>
+              {fileMeta.name}
+            </span>
+          ) : null}
+        </div>
         <div className="pane-meta" aria-live="polite">
           <span className="stat">{characters} chars</span>
           <span className="stat">{lines} lines</span>
-          {fileMeta ? (
-            <span className="stat filename-stat" data-testid="file-meta" title={fileMeta.name}>
-              {fileMeta.name}
-            </span>
-          ) : (
-            <span className="stat">{formatBytes(bytes)}</span>
-          )}
+          <span className="stat">{formatBytes(bytes)}</span>
+          <label className="button button-secondary button-compact" htmlFor="file-input">
+            <FileUp size={16} aria-hidden />
+            Choose file
+          </label>
+          <input
+            id="file-input"
+            type="file"
+            accept=".txt,.md,.csv,.tsv,.log,text/plain,text/markdown,text/csv,text/tab-separated-values"
+            hidden
+            onChange={(event) => {
+              void onFileSelected(event.target.files);
+              event.target.value = '';
+            }}
+            data-testid="file-input"
+          />
         </div>
       </div>
       <div
@@ -514,38 +545,34 @@ export function SimpleAppShell() {
           setDragging(true);
         }}
         onDragOver={(event) => event.preventDefault()}
-        onDragLeave={() => setDragging(false)}
+        onDragLeave={(event) => {
+          if (!event.currentTarget.contains(event.relatedTarget as Node | null)) {
+            setDragging(false);
+          }
+        }}
         onDrop={onDrop}
         data-testid="dropzone"
       >
-        <label htmlFor="document-input" className="sr-only">
-          Paste text here, or choose a file
-        </label>
-        <textarea
-          id="document-input"
-          className="textarea editor-textarea"
-          value={text}
-          onChange={(event) => updateText(event.target.value)}
-          placeholder="Paste text here, or choose a file"
-          data-testid="document-input"
-        />
+        <div className="editor-document">
+          <label htmlFor="document-input" className="sr-only">
+            Paste text here, or choose a file
+          </label>
+          <textarea
+            id="document-input"
+            className="textarea editor-textarea"
+            value={text}
+            onChange={(event) => updateText(event.target.value)}
+            placeholder="Paste text here, or choose a file"
+            data-testid="document-input"
+          />
+          {dragging ? (
+            <div className="editor-drop-overlay" role="status" data-testid="drop-overlay">
+              Drop the file to open it locally
+            </div>
+          ) : null}
+        </div>
       </div>
       <div className="pane-toolbar">
-        <label className="button button-secondary button-compact" htmlFor="file-input">
-          <FileUp size={16} aria-hidden />
-          Choose a file
-        </label>
-        <input
-          id="file-input"
-          type="file"
-          accept=".txt,.md,.csv,.tsv,.log,text/plain,text/markdown,text/csv,text/tab-separated-values"
-          hidden
-          onChange={(event) => {
-            void onFileSelected(event.target.files);
-            event.target.value = '';
-          }}
-          data-testid="file-input"
-        />
         <button
           type="button"
           className="button button-tertiary button-compact"
@@ -560,17 +587,24 @@ export function SimpleAppShell() {
         >
           Clear
         </button>
-        <button
-          type="button"
-          className="button button-secondary button-compact"
-          onClick={restoreOriginal}
-          disabled={originalText.length === 0}
-          data-testid="restore-original"
+        {canRestore ? (
+          <button
+            type="button"
+            className="button button-secondary button-compact"
+            onClick={restoreOriginal}
+            data-testid="restore-original"
+          >
+            Restore original
+          </button>
+        ) : null}
+        <span
+          className="muted file-hint"
+          title=".txt, .md, .csv, .tsv, and .log files up to the local size limit. Files stay on this device and are never uploaded."
         >
-          Restore original
-        </button>
-        <span className="muted file-hint desktop-only">
-          .txt · .md · .csv · .tsv · .log · up to {formatBytes(MAX_INPUT_BYTES)} · stays on device
+          Plain-text files · up to {fileLimitLabel}
+        </span>
+        <span className="local-status" title="Your text is processed in this browser only.">
+          Stays on this device
         </span>
       </div>
       {fileError ? (
@@ -621,25 +655,27 @@ export function SimpleAppShell() {
 
       {!generation && !preview && !fullResult ? (
         <div className="empty-intelligence" data-testid="intelligence-empty">
-          <div className="empty-intelligence-icon" aria-hidden>
-            <Sparkles size={22} />
+          <div className="preview-empty-visual" aria-hidden="true">
+            <div className="preview-empty-card is-messy">
+              <span> apple </span>
+              <span> apple </span>
+              <span> banana </span>
+            </div>
+            <div className="preview-empty-arrow">
+              <Sparkles size={16} />
+            </div>
+            <div className="preview-empty-card is-clean">
+              <span>apple</span>
+              <span>banana</span>
+            </div>
           </div>
           <h3>Your preview will appear here</h3>
           <p className="muted">
-            Paste text, choose an example, then generate to review before and after.
+            Describe a change to compare the original and transformed text before applying it.
           </p>
-          <div className="empty-intelligence-actions">
-            {featuredExamples.slice(0, 2).map((example) => (
-              <button
-                key={`empty-${example.id}`}
-                type="button"
-                className="example-suggestion"
-                onClick={() => loadExample(example.instruction)}
-              >
-                {example.label}
-              </button>
-            ))}
-          </div>
+          <p className="muted empty-intelligence-note">
+            The full document is processed only after you approve the preview.
+          </p>
         </div>
       ) : null}
 
@@ -756,10 +792,10 @@ export function SimpleAppShell() {
                 value={fullResult.output}
                 data-testid="result-output"
               />
-              <div className="actions wrap-actions">
+              <div className="actions wrap-actions result-actions">
                 <button
                   type="button"
-                  className="button button-primary"
+                  className="button button-secondary"
                   onClick={() => void copyResult()}
                   data-testid="copy-result"
                 >
@@ -768,7 +804,7 @@ export function SimpleAppShell() {
                 </button>
                 <button
                   type="button"
-                  className="button button-secondary"
+                  className="button button-primary"
                   onClick={downloadResult}
                   data-testid="download-result"
                 >
@@ -786,7 +822,7 @@ export function SimpleAppShell() {
                 </button>
                 <button
                   type="button"
-                  className="button button-secondary"
+                  className="button button-tertiary"
                   onClick={() => {
                     setPhase('compose');
                     setMobileTab('text');
@@ -798,7 +834,7 @@ export function SimpleAppShell() {
                 </button>
                 <button
                   type="button"
-                  className="button button-secondary"
+                  className="button button-tertiary"
                   onClick={startOver}
                   data-testid="start-over"
                 >

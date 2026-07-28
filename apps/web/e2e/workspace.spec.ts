@@ -27,14 +27,43 @@ test('warm light shell tokens and empty preview copy', async ({ page }) => {
   await expect(page.getByTestId('intelligence-empty')).toContainText(
     /your preview will appear here/i,
   );
-  await expect(page.getByTestId('example-featured').locator('button')).toHaveCount(3);
+  await expect(page.getByTestId('intelligence-empty')).toContainText(
+    /describe a change to compare/i,
+  );
+  await expect(page.getByTestId('intelligence-empty').locator('button')).toHaveCount(0);
+  await expect(page.getByTestId('example-featured').locator('button')).toHaveCount(2);
   await expect(page.getByTestId('examples-menu')).toBeHidden();
   await expect(page.getByTestId('generate-transformation')).toBeDisabled();
   await expect(page.getByTestId('generate-transformation')).toHaveClass(/button-primary/);
+  await expect(page.getByTestId('rail-examples')).toBeVisible();
+  await expect(page.getByTestId('advanced-editor-menu-link')).toBeHidden();
+  await page.getByTestId('app-menu-toggle').click();
+  await expect(page.getByTestId('advanced-editor-menu-link')).toBeVisible();
   const canvas = await page.evaluate(() =>
     getComputedStyle(document.documentElement).getPropertyValue('--canvas').trim(),
   );
   expect(canvas.toLowerCase()).toBe('#f4f1eb');
+});
+
+test('example selection fills instruction without auto-generating', async ({ page }) => {
+  await page.goto('/app');
+  await page.getByTestId('document-input').fill('  apple  \n  apple  \n');
+  await page.getByTestId('example-clean-list').click();
+  await expect(page.getByTestId('instruction-input')).toHaveValue(
+    'Remove duplicate lines and trim spaces',
+  );
+  await expect(page.getByTestId('generate-transformation')).toBeEnabled();
+  await expect(page.getByTestId('generation-summary')).toHaveCount(0);
+});
+
+test('source drag overlay appears while dragging over the editor', async ({ page }) => {
+  await page.goto('/app');
+  const dropzone = page.getByTestId('dropzone');
+  await dropzone.dispatchEvent('dragenter');
+  await expect(page.getByTestId('drop-overlay')).toBeVisible();
+  await expect(page.getByTestId('drop-overlay')).toContainText(/drop the file to open it locally/i);
+  await dropzone.dispatchEvent('dragleave');
+  await expect(page.getByTestId('drop-overlay')).toHaveCount(0);
 });
 
 test('desktop simple flow: example generate preview apply', async ({ page }) => {

@@ -28,12 +28,18 @@ describe('AppChrome', () => {
     const user = userEvent.setup();
     render(<AppChrome />);
     expect(screen.getByTestId('prototype-notice')).toHaveTextContent(/prototype/i);
-    expect(screen.getByTestId('advanced-editor-link')).toHaveAttribute('href', '/app/advanced');
+    expect(screen.queryByTestId('advanced-editor-link')).not.toBeInTheDocument();
     expect(screen.getByTestId('rail-new')).toHaveClass('is-active');
+    expect(screen.getByTestId('rail-examples')).toBeVisible();
+    expect(screen.getByTestId('rail-help')).toBeVisible();
     const toggle = screen.getByTestId('app-menu-toggle');
     expect(toggle).toHaveAttribute('aria-expanded', 'false');
     await user.click(toggle);
     expect(toggle).toHaveAttribute('aria-expanded', 'true');
     expect(screen.getByTestId('app-overflow-menu')).toBeVisible();
+    expect(screen.getByTestId('advanced-editor-menu-link')).toHaveAttribute(
+      'href',
+      '/app/advanced',
+    );
   });
 });

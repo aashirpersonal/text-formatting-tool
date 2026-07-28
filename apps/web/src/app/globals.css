@@ -15,9 +15,9 @@
   --border-strong: #c9c0b4;
   --divider: #e8e2da;
 
-  --primary: #6657d9;
-  --primary-hover: #5546c2;
-  --primary-active: #493bab;
+  --primary: #5a4bcf;
+  --primary-hover: #4b3db8;
+  --primary-active: #4032a1;
   --primary-soft: #ece9ff;
   --primary-text: #ffffff;
 
@@ -28,7 +28,7 @@
   --danger: #a43f3f;
   --danger-soft: #fae8e8;
 
-  --focus: #6657d9;
+  --focus: #5a4bcf;
   --shadow-soft: 0 8px 30px rgb(54 44 35 / 0.08);
   --shadow-popover: 0 18px 60px rgb(54 44 35 / 0.14);
 
@@ -46,7 +46,7 @@
   --cyan: #3d7ea6;
   --cyan-soft: #e7f3f8;
   --destructive: var(--danger);
-  --glow: 0 6px 18px rgb(102 87 217 / 0.22);
+  --glow: 0 6px 18px rgb(90 75 207 / 0.22);
   --shadow: var(--shadow-soft);
   --radius: 12px;
   --radius-sm: 10px;
@@ -238,6 +238,7 @@ summary:focus-visible,
   background: var(--primary);
   color: var(--primary-text);
   box-shadow: var(--glow);
+  font-weight: 700;
 }
 
 .button-primary:hover:not(:disabled):not([aria-disabled='true']) {
@@ -411,33 +412,32 @@ button.chip:hover {
 
 .example-suggestion {
   appearance: none;
-  border: 0;
-  background: transparent;
-  color: var(--primary);
+  border: 1px solid var(--border);
+  background: var(--surface-subtle);
+  color: var(--text-secondary);
   font: inherit;
-  font-size: 0.88rem;
+  font-size: 0.84rem;
   font-weight: 550;
-  padding: 0.35rem 0.55rem;
+  padding: 0.4rem 0.7rem;
   min-height: 36px;
   border-radius: 8px;
   cursor: pointer;
   text-align: left;
-  text-decoration: underline;
-  text-decoration-color: color-mix(in srgb, var(--primary) 35%, transparent);
-  text-underline-offset: 0.18em;
+  text-decoration: none;
 }
 
 .example-suggestion:hover {
   background: var(--primary-soft);
-  text-decoration-color: var(--primary);
+  border-color: color-mix(in srgb, var(--primary) 28%, var(--border));
+  color: var(--primary-active);
 }
 
 .example-menu {
   display: none;
-  flex-wrap: wrap;
-  gap: var(--space-2);
+  flex-direction: column;
+  gap: 0.15rem;
   padding: var(--space-2);
-  border: 1px solid var(--divider);
+  border: 1px solid var(--border);
   border-radius: var(--radius-sm);
   background: var(--surface-raised);
   box-shadow: var(--shadow-popover);
@@ -445,6 +445,26 @@ button.chip:hover {
 
 .example-menu.is-open {
   display: flex;
+}
+
+.example-menu-item {
+  appearance: none;
+  border: 0;
+  background: transparent;
+  color: var(--text);
+  font: inherit;
+  font-size: 0.9rem;
+  font-weight: 500;
+  text-align: left;
+  padding: 0.65rem 0.75rem;
+  min-height: 44px;
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+.example-menu-item:hover {
+  background: var(--primary-soft);
+  color: var(--primary-active);
 }
 
 .example-label {
@@ -730,6 +750,33 @@ button.chip:hover {
   font-size: 0.9rem;
 }
 
+.demo-composer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+  padding: 0.85rem 1rem;
+  border-top: 1px solid var(--divider);
+  background: var(--surface-raised);
+}
+
+.demo-composer .demo-instruction {
+  margin: 0;
+  flex: 1;
+  min-width: 0;
+}
+
+.demo-generate {
+  flex-shrink: 0;
+  border-radius: var(--radius-sm);
+  background: var(--primary);
+  color: var(--primary-text);
+  font-size: 0.82rem;
+  font-weight: 650;
+  padding: 0.55rem 0.85rem;
+  box-shadow: var(--glow);
+}
+
 .landing-section h2 {
   margin: 0 0 var(--space-4);
   letter-spacing: -0.03em;
@@ -953,29 +1000,34 @@ button.chip:hover {
 }
 
 .rail-item {
+  appearance: none;
+  border: 1px solid transparent;
+  background: transparent;
+  width: 100%;
   display: grid;
   justify-items: center;
-  gap: 0.28rem;
+  gap: 0.3rem;
   text-decoration: none;
   color: var(--text-secondary);
-  font-size: 0.75rem;
+  font: inherit;
+  font-size: 0.78rem;
   font-weight: 650;
-  padding: 0.65rem 0.25rem;
+  padding: 0.7rem 0.25rem;
   border-radius: var(--radius-sm);
-  min-height: 56px;
-  border: 1px solid transparent;
+  min-height: 58px;
+  cursor: pointer;
 }
 
 .rail-item:hover {
   color: var(--text);
-  background: color-mix(in srgb, var(--surface-raised) 70%, var(--surface-subtle));
+  background: color-mix(in srgb, var(--surface-raised) 72%, var(--surface-subtle));
 }
 
 .rail-item.is-active {
   color: var(--primary-active);
   background: var(--primary-soft);
   border-color: color-mix(in srgb, var(--primary) 22%, transparent);
-  font-weight: 700;
+  font-weight: 750;
 }
 
 .app-main {
@@ -1020,17 +1072,19 @@ button.chip:hover {
 .source-pane {
   grid-area: source;
   border-right: 1px solid var(--divider);
-  background: var(--editor);
+  background: var(--surface-raised);
 }
 
 .result-pane {
   grid-area: result;
-  background: var(--surface);
+  background: color-mix(in srgb, var(--primary-soft) 42%, var(--surface));
 }
 
 .composer-slot {
   grid-area: composer;
   border-right: 1px solid var(--divider);
+  padding: 0.85rem 1rem 1rem;
+  background: transparent;
 }
 
 .workspace-pane {
@@ -1050,6 +1104,18 @@ button.chip:hover {
   background: transparent;
 }
 
+.source-header {
+  flex-wrap: wrap;
+  row-gap: 0.55rem;
+}
+
+.source-heading-group {
+  display: flex;
+  align-items: baseline;
+  gap: var(--space-2);
+  min-width: 0;
+}
+
 .pane-header h2 {
   margin: 0;
   font-size: 1.02rem;
@@ -1059,8 +1125,11 @@ button.chip:hover {
 
 .pane-meta {
   display: flex;
+  flex-wrap: wrap;
   gap: var(--space-2);
+  align-items: center;
   min-width: 0;
+  justify-content: flex-end;
 }
 
 .pane-meta .stat {
@@ -1072,17 +1141,39 @@ button.chip:hover {
   font-weight: 500;
 }
 
+.filename-stat {
+  max-width: 18ch;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  color: var(--text-secondary);
+  font-size: 0.84rem;
+  font-weight: 600;
+}
+
 .editor-frame {
   flex: 1;
   min-height: 0;
   display: flex;
-  padding: 0.85rem 1.15rem 0;
+  padding: 0.85rem 1.15rem 0.35rem;
+  position: relative;
 }
 
-.editor-frame.is-dragging {
-  outline: 2px dashed var(--primary);
-  outline-offset: -8px;
-  background: var(--primary-soft);
+.editor-document {
+  position: relative;
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  border-radius: 14px;
+  background: var(--editor);
+  border: 1px solid var(--divider);
+  box-shadow: inset 0 1px 0 rgb(255 255 255 / 0.7);
+  overflow: hidden;
+}
+
+.editor-frame.is-dragging .editor-document {
+  border-color: color-mix(in srgb, var(--primary) 45%, var(--border));
+  background: color-mix(in srgb, var(--primary-soft) 55%, var(--editor));
 }
 
 .editor-textarea {
@@ -1092,10 +1183,15 @@ button.chip:hover {
   resize: none;
   border: 0;
   background: transparent;
-  padding: 0.5rem 0.15rem;
+  padding: 1rem 1.1rem;
   font-family: var(--font-mono);
   font-size: 0.95rem;
+  line-height: 1.55;
   box-shadow: none;
+}
+
+.editor-textarea::placeholder {
+  color: var(--text-muted);
 }
 
 .editor-textarea:focus {
@@ -1105,8 +1201,24 @@ button.chip:hover {
 
 .editor-textarea:focus-visible {
   outline: none;
-  box-shadow: inset 0 0 0 2px color-mix(in srgb, var(--primary) 35%, transparent);
-  border-radius: 8px;
+  box-shadow: inset 0 0 0 2px color-mix(in srgb, var(--primary) 32%, transparent);
+}
+
+.editor-drop-overlay {
+  position: absolute;
+  inset: 0.65rem;
+  display: grid;
+  place-items: center;
+  text-align: center;
+  padding: 1rem;
+  border-radius: 12px;
+  border: 1.5px dashed color-mix(in srgb, var(--primary) 45%, var(--border));
+  background: color-mix(in srgb, var(--primary-soft) 78%, rgb(255 255 255 / 0.55));
+  color: var(--primary-active);
+  font-weight: 650;
+  font-size: 0.95rem;
+  pointer-events: none;
+  z-index: 2;
 }
 
 .pane-toolbar {
@@ -1114,21 +1226,37 @@ button.chip:hover {
   flex-wrap: wrap;
   gap: var(--space-2);
   align-items: center;
-  padding: 0.85rem 1.15rem;
-  border-top: 1px solid var(--divider);
+  padding: 0.7rem 1.15rem 0.85rem;
 }
 
 .file-hint {
   font-size: 0.8rem;
+  margin-left: auto;
+}
+
+.local-status {
+  display: inline-flex;
+  align-items: center;
+  border-radius: 999px;
+  padding: 0.25rem 0.65rem;
+  background: var(--success-soft);
+  color: var(--success);
+  font-size: 0.78rem;
+  font-weight: 650;
 }
 
 .composer {
   background: var(--surface-raised);
-  border-top: 1px solid var(--divider);
-  padding: 1rem 1.15rem calc(1rem + var(--safe-bottom));
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 1rem 1.1rem;
   display: grid;
   gap: var(--space-3);
-  box-shadow: 0 -8px 24px rgb(54 44 35 / 0.04);
+  box-shadow: var(--shadow-soft);
+}
+
+.composer-card {
+  position: relative;
 }
 
 .composer-header {
@@ -1143,13 +1271,14 @@ button.chip:hover {
   font-size: 0.98rem;
 }
 
-.composer-hint {
+.composer-proto {
   font-size: 0.8rem;
 }
 
 .composer-input {
-  min-height: 5rem;
+  min-height: 5.25rem;
   resize: vertical;
+  max-height: 12rem;
   border-color: var(--border);
   background: var(--editor);
   box-shadow: none;
@@ -1158,6 +1287,22 @@ button.chip:hover {
 .composer-input:focus {
   border-color: color-mix(in srgb, var(--primary) 55%, var(--border));
   box-shadow: 0 0 0 3px color-mix(in srgb, var(--primary) 18%, transparent);
+}
+
+.composer-footer {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  justify-content: space-between;
+  align-items: center;
+}
+
+.composer-footer-left {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  align-items: center;
+  min-width: 0;
 }
 
 .composer-actions {
@@ -1195,15 +1340,47 @@ button.chip:hover {
   flex: 1;
 }
 
-.empty-intelligence-icon {
-  width: 52px;
-  height: 52px;
-  border-radius: 16px;
+.preview-empty-visual {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin-bottom: 0.35rem;
+}
+
+.preview-empty-card {
+  display: grid;
+  gap: 0.28rem;
+  min-width: 7.5rem;
+  padding: 0.7rem 0.8rem;
+  border-radius: 12px;
+  border: 1px solid var(--border);
+  background: var(--surface-raised);
+  font-family: var(--font-mono);
+  font-size: 0.78rem;
+  text-align: left;
+  box-shadow: var(--shadow-soft);
+}
+
+.preview-empty-card.is-messy {
+  background: var(--surface-subtle);
+  color: var(--text-secondary);
+}
+
+.preview-empty-card.is-clean {
+  background: var(--success-soft);
+  border-color: color-mix(in srgb, var(--success) 22%, var(--border));
+  color: var(--success);
+}
+
+.preview-empty-arrow {
+  width: 36px;
+  height: 36px;
+  border-radius: 999px;
   display: grid;
   place-items: center;
   background: var(--primary-soft);
   color: var(--primary);
-  border: 1px solid color-mix(in srgb, var(--primary) 18%, transparent);
+  border: 1px solid color-mix(in srgb, var(--primary) 20%, transparent);
 }
 
 .empty-intelligence h3 {
@@ -1215,15 +1392,15 @@ button.chip:hover {
 
 .empty-intelligence p {
   margin: 0;
-  max-width: 36ch;
+  max-width: 38ch;
 }
 
-.empty-intelligence-actions {
-  display: flex;
-  flex-wrap: wrap;
-  gap: var(--space-2);
-  justify-content: center;
-  margin-top: var(--space-1);
+.empty-intelligence-note {
+  font-size: 0.86rem;
+}
+
+.result-actions {
+  margin-top: 0.25rem;
 }
 
 .segmented {
@@ -1420,10 +1597,6 @@ button.chip:hover {
     border-right: 0;
   }
 
-  .composer-slot {
-    border-right: 0;
-  }
-
   .mobile-surface {
     display: none;
     flex: 1;
@@ -1441,11 +1614,41 @@ button.chip:hover {
   }
 
   .composer-slot {
+    border-right: 0;
     position: sticky;
     bottom: 0;
     z-index: 20;
     flex: 0 0 auto;
+    padding: 0.65rem 0.75rem calc(0.65rem + var(--safe-bottom));
+    background: color-mix(in srgb, var(--canvas) 88%, transparent);
     box-shadow: 0 -10px 30px rgb(54 44 35 / 0.08);
+  }
+
+  .composer {
+    padding: 0.85rem 0.9rem;
+    border-radius: 12px;
+  }
+
+  .composer-input {
+    min-height: 4.25rem;
+    max-height: 8rem;
+  }
+
+  .composer-proto {
+    display: none;
+  }
+
+  .file-hint {
+    margin-left: 0;
+    width: 100%;
+  }
+
+  .source-header .pane-meta .button {
+    order: 5;
+  }
+
+  .preview-empty-visual {
+    transform: scale(0.92);
   }
 
   .preview-grid {
@@ -1462,10 +1665,6 @@ button.chip:hover {
 
   .result-pane .status-line {
     max-width: 100%;
-  }
-
-  .composer-hint {
-    display: none;
   }
 
   .example-menu:not(.is-open) {

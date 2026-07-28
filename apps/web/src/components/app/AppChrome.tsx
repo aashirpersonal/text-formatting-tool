@@ -139,39 +139,31 @@ export function AppChrome() {
           aria-current={isAppHome && !isAdvanced ? 'page' : undefined}
           data-testid="rail-new"
         >
-          <Plus size={18} aria-hidden />
+          <Plus size={20} aria-hidden />
           <span>New</span>
         </Link>
-        <a
+        <button
+          type="button"
           className="rail-item"
-          href="#examples"
           title="Example transformations"
           aria-label="Example transformations"
-          onClick={(event) => {
-            event.preventDefault();
+          data-testid="rail-examples"
+          onClick={() => {
+            window.dispatchEvent(new Event('tft:open-examples'));
             document.getElementById('examples')?.scrollIntoView({ block: 'nearest' });
           }}
         >
-          <Sparkles size={18} aria-hidden />
+          <Sparkles size={20} aria-hidden />
           <span>Examples</span>
-        </a>
-        <Link
-          className={isAdvanced ? 'rail-item is-active' : 'rail-item'}
-          href="/app/advanced"
-          title="Advanced editor"
-          aria-label="Advanced editor"
-          data-testid="advanced-editor-link"
-        >
-          <FileText size={18} aria-hidden />
-          <span>Advanced</span>
-        </Link>
+        </button>
         <Link
           className="rail-item"
           href="/about"
           title="Help and about"
           aria-label="Help and about"
+          data-testid="rail-help"
         >
-          <HelpCircle size={18} aria-hidden />
+          <HelpCircle size={20} aria-hidden />
           <span>Help</span>
         </Link>
       </aside>

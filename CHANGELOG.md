@@ -6,6 +6,7 @@ All notable changes to this project will be documented in this file.
 
 ### Changed
 
+- Polished the warm light app shell: document-style editor, unified docked composer, single examples system, richer preview empty state, and demoted Advanced to the app menu.
 - Default application and marketing visuals switched to a warm light productivity theme with shared design tokens, button hierarchy (primary/secondary/tertiary/destructive/disabled), and reduced example-prompt density.
 
 ### Added

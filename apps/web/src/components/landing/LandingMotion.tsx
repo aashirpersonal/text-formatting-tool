@@ -49,11 +49,9 @@ export function LandingMotion() {
         .from('.demo-instruction', { opacity: 0, y: 10, duration: 0.4 })
         .to('.demo-before', { opacity: 0.35, duration: 0.25 })
         .from('.demo-after', { opacity: 0, y: 8, duration: 0.45 })
-        .from('.demo-status', { opacity: 0, scale: 0.95, duration: 0.35 })
-        .from('.landing-cta-primary', {
-          boxShadow: '0 0 0 rgba(102,87,217,0)',
-          duration: 0.4,
-        });
+        .from('.demo-status', { opacity: 0, scale: 0.95, duration: 0.35 });
+
+      // Keep CTA visible and solid for contrast; avoid animating its paint styles.
 
       gsap.from('.benefit-item', {
         scrollTrigger: {
@@ -133,7 +131,7 @@ export function LandingMotion() {
               <span />
               <span />
               <span />
-              <strong>Transform</strong>
+              <strong>Text Formatting Tool</strong>
             </div>
             <div className="hero-window-body">
               <div className="demo-source">
@@ -147,7 +145,7 @@ export function LandingMotion() {
                 </div>
               </div>
               <div className="demo-intel">
-                <div className="demo-instruction">Remove duplicates and trim spaces.</div>
+                <small>Preview</small>
                 <div className="demo-after">
                   {AFTER_LINES.map((line) => (
                     <div key={line.id}>{line.text}</div>
@@ -155,6 +153,10 @@ export function LandingMotion() {
                 </div>
                 <div className="demo-status">Processed locally</div>
               </div>
+            </div>
+            <div className="demo-composer">
+              <div className="demo-instruction">Remove duplicates and trim spaces.</div>
+              <div className="demo-generate">Generate transformation</div>
             </div>
           </div>
         </div>
