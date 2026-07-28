@@ -18,8 +18,9 @@ export default function HomePage() {
       <h1>Turn plain-English instructions into safe, reusable text transformations.</h1>
       <p className="lede">
         Text Formatting Tool is being rebuilt so AI can help author an explainable transformation
-        recipe, while a trusted local engine processes the complete document in the browser. This
-        scaffold does not yet generate recipes or transform documents with AI.
+        recipe, while a trusted local engine processes the complete document in the browser. You can
+        already build recipes manually and run them locally in a Web Worker. AI recipe generation is
+        not implemented yet.
       </p>
       <div className="actions">
         <Link className="button button-primary" href="/app">

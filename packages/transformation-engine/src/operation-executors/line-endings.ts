@@ -1,6 +1,6 @@
 import type { LineEndingsNormalizeOperation } from '@tft/transformation-schema';
-import { parseLineDocument, serializeLineDocument, type LineEnding } from '../line-document.js';
-import type { OperationApplyResult } from '../types.js';
+import { parseLineDocument, serializeLineDocument, type LineEnding } from '../line-document';
+import type { OperationApplyResult } from '../types';
 
 export function applyLineEndingsNormalize(
   input: string,

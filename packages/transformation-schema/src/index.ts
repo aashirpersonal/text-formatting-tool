@@ -5,7 +5,7 @@
  * Plans never contain executable JavaScript. See docs/v2/TRANSFORMATION_PLAN_V1.md.
  */
 
-export { PLAN_LIMITS, type PlanLimits } from './limits.js';
+export { PLAN_LIMITS, type PlanLimits } from './limits';
 
 export {
   OPERATION_TYPES,
@@ -28,7 +28,7 @@ export {
   type LinesAffixOperation,
   type LineEndingsNormalizeOperation,
   type UnicodeNormalizeOperation,
-} from './operations.js';
+} from './operations';
 
 export {
   TRANSFORMATION_PLAN_SCHEMA_VERSION,
@@ -37,6 +37,6 @@ export {
   safeParseTransformationPlan,
   type TransformationPlan,
   type SafeParseTransformationPlanResult,
-} from './plan.js';
+} from './plan';
 
-export { getTransformationPlanJsonSchema, transformationPlanJsonSchema } from './json-schema.js';
+export { getTransformationPlanJsonSchema, transformationPlanJsonSchema } from './json-schema';

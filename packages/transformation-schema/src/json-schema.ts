@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { transformationPlanSchema } from './plan.js';
+import { transformationPlanSchema } from './plan';
 
 /**
  * JSON Schema (draft 2020-12) derived from the Zod TransformationPlan schema.

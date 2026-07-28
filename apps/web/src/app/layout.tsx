@@ -1,7 +1,7 @@
 import type { Metadata } from 'next';
 import { IBM_Plex_Mono, IBM_Plex_Sans } from 'next/font/google';
-import Link from 'next/link';
 import type { CSSProperties, ReactNode } from 'react';
+import { SiteHeader } from '@/components/SiteHeader';
 import './globals.css';
 
 const sans = IBM_Plex_Sans({
@@ -27,13 +27,6 @@ export const metadata: Metadata = {
     'Turn plain-English instructions into safe, reusable text transformations. v2 is under active development.',
 };
 
-const nav = [
-  { href: '/', label: 'Home' },
-  { href: '/app', label: 'Workspace' },
-  { href: '/about', label: 'About' },
-  { href: '/privacy', label: 'Privacy' },
-];
-
 export default function RootLayout({ children }: { children: ReactNode }) {
   return (
     <html lang="en" className={`${sans.variable} ${mono.variable}`}>
@@ -49,22 +42,7 @@ export default function RootLayout({ children }: { children: ReactNode }) {
           <a className="skip-link" href="#main">
             Skip to content
           </a>
-          <header className="site-header">
-            <div className="container nav">
-              <Link className="brand" href="/">
-                Text Formatting Tool
-              </Link>
-              <nav aria-label="Primary">
-                <ul className="nav-links">
-                  {nav.map((item) => (
-                    <li key={item.href}>
-                      <Link href={item.href}>{item.label}</Link>
-                    </li>
-                  ))}
-                </ul>
-              </nav>
-            </div>
-          </header>
+          <SiteHeader />
           <main id="main">{children}</main>
           <footer className="site-footer">
             <div className="container" style={{ paddingBlock: '1.25rem' }}>

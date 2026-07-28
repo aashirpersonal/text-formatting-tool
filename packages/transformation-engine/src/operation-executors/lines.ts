@@ -12,8 +12,8 @@ import {
   preferredEndingFrom,
   serializeLineDocument,
   type LogicalLine,
-} from '../line-document.js';
-import type { OperationApplyResult } from '../types.js';
+} from '../line-document';
+import type { OperationApplyResult } from '../types';
 
 export function applyLinesTrim(input: string, operation: LinesTrimOperation): OperationApplyResult {
   const doc = ensureLogicalLines(parseLineDocument(input));

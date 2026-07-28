@@ -3,9 +3,9 @@ import {
   safeParseTransformationPlan,
   type TransformationPlan,
 } from '@tft/transformation-schema';
-import { characterCount, resolveExecutionLimits, utf8ByteLength } from './limits.js';
-import { applyOperation } from './operation-executors/index.js';
-import type { ExecutionOptions, ExecutionResult, OperationExecutionReport } from './types.js';
+import { characterCount, resolveExecutionLimits, utf8ByteLength } from './limits';
+import { applyOperation } from './operation-executors/index';
+import type { ExecutionOptions, ExecutionResult, OperationExecutionReport } from './types';
 
 function fail(
   code: Extract<ExecutionResult, { ok: false }>['error']['code'],

@@ -1,6 +1,6 @@
 # Product blueprint — text transformation tool (v2)
 
-**Status:** Approved product direction. Application scaffold exists on `v2-rebuild`. Transformation Plan v1 schema and deterministic engine core exist as packages; AI integration and workspace/Worker wiring are not yet implemented.
+**Status:** Approved product direction. Application scaffold and local Worker-backed manual workspace exist on `v2-rebuild`. AI integration is not yet implemented.
 **Date:** 2026-07-28
 **Related:** `docs/v2/ARCHITECTURE_DECISIONS.md`, `docs/audits/2026-07-28-legacy-v1-baseline.md`, `docs/evidence/EVIDENCE_REGISTER.md`
 

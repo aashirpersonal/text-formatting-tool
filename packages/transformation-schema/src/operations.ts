@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { PLAN_LIMITS } from './limits.js';
+import { PLAN_LIMITS } from './limits';
 
 const operationIdSchema = z
   .string()

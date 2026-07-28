@@ -3,7 +3,7 @@ import {
   applyTrailingEndingPolicy,
   parseLineDocument,
   serializeLineDocument,
-} from './line-document.js';
+} from './line-document';
 
 describe('line document model', () => {
   it('round-trips LF, CRLF, CR, and mixed endings', () => {

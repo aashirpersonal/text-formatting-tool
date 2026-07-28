@@ -1,5 +1,5 @@
 import type { UnicodeNormalizeOperation } from '@tft/transformation-schema';
-import type { OperationApplyResult } from '../types.js';
+import type { OperationApplyResult } from '../types';
 
 /**
  * Uses String.prototype.normalize.

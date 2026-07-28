@@ -1,4 +1,4 @@
-import type { TransformationPlan } from '../src/index.js';
+import type { TransformationPlan } from '../src/index';
 
 export function validPlan(
   overrides: Partial<TransformationPlan> & {

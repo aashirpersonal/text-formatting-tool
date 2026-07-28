@@ -94,7 +94,7 @@ These ADRs record **approved direction**. They do not claim that the v2 applicat
 | **Consequences**          | Shared schema package or duplicated schema with CI drift checks.                                                                                                        |
 | **Unresolved questions**  | Schema library choice (e.g. Zod) at scaffold time.                                                                                                                      |
 
-**Implementation note (2026-07-28):** Zod **4.4.3** is the direct schema dependency. `executeTransformationPlan` validates unknown plans via `safeParseTransformationPlan` before any mutation. Server/client product integration remains future work.
+**Implementation note (2026-07-28):** Zod **4.4.3** is the direct schema dependency. `executeTransformationPlan` validates unknown plans via `safeParseTransformationPlan` before any mutation. The workspace UI validates drafts with the same schema package before Worker execution. Server-side AI validation remains future work.
 
 ---
 
@@ -140,7 +140,7 @@ These ADRs record **approved direction**. They do not claim that the v2 applicat
 | **Consequences**          | Structured messaging protocol for progress/cancel/results; careful Transferable usage for large strings.  |
 | **Unresolved questions**  | Worker bundling approach under Next.js; fallback when Workers unavailable.                                |
 
-**Implementation note (2026-07-28):** Engine core is Worker-compatible (no DOM/`Buffer`), but Worker packaging and UI messaging are still future work.
+**Implementation note (2026-07-28):** Engine core is Worker-compatible (no DOM/`Buffer`). The web workspace now runs preview/full jobs in a browser Web Worker via `TransformationWorkerClient`. Cancellation terminates the Worker; progress events remain future work.
 
 ---
 

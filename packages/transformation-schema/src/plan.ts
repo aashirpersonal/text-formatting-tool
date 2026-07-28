@@ -1,6 +1,6 @@
 import { z } from 'zod';
-import { PLAN_LIMITS } from './limits.js';
-import { transformationOperationSchema } from './operations.js';
+import { PLAN_LIMITS } from './limits';
+import { transformationOperationSchema } from './operations';
 
 export const TRANSFORMATION_PLAN_SCHEMA_VERSION = '1.0' as const;
 

@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
-import { executeTransformationPlan } from './execute.js';
-import { basePlan } from './test-helpers.js';
+import { executeTransformationPlan } from './execute';
+import { basePlan } from './test-helpers';
 
 describe('representative fixtures', () => {
   it('normalises a copied list', () => {

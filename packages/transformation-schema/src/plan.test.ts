@@ -7,8 +7,8 @@ import {
   safeParseTransformationPlan,
   transformationPlanJsonSchema,
   transformationPlanSchema,
-} from './index.js';
-import { validPlan } from './test-helpers.js';
+} from './index';
+import { validPlan } from './test-helpers';
 
 describe('Transformation Plan v1 schema', () => {
   it('accepts a valid complete plan', () => {

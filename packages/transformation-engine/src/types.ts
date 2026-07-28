@@ -55,4 +55,4 @@ export type OperationApplyResult = {
   readonly warnings: readonly string[];
 };
 
-export type { ExecutionLimits, ExecutionOptions } from './limits.js';
+export type { ExecutionLimits, ExecutionOptions } from './limits';

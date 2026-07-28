@@ -1,5 +1,5 @@
 import type { ReplaceLiteralOperation } from '@tft/transformation-schema';
-import type { OperationApplyResult } from '../types.js';
+import type { OperationApplyResult } from '../types';
 
 /**
  * Literal string replacement without RegExp.

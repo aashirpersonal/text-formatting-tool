@@ -1,15 +1,15 @@
 import type { TransformationOperation } from '@tft/transformation-schema';
-import type { OperationApplyResult } from '../types.js';
-import { applyLineEndingsNormalize } from './line-endings.js';
+import type { OperationApplyResult } from '../types';
+import { applyLineEndingsNormalize } from './line-endings';
 import {
   applyLinesAffix,
   applyLinesDedupe,
   applyLinesFilterContains,
   applyLinesRemoveEmpty,
   applyLinesTrim,
-} from './lines.js';
-import { applyReplaceLiteral } from './replace-literal.js';
-import { applyUnicodeNormalize } from './unicode.js';
+} from './lines';
+import { applyReplaceLiteral } from './replace-literal';
+import { applyUnicodeNormalize } from './unicode';
 
 /**
  * Closed allowlist dispatcher. Plan `type` values cannot select arbitrary functions.

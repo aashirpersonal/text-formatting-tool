@@ -12,55 +12,57 @@ Text Formatting Tool is intended to become an AI-guided, deterministic, privacy-
 4. The model returns a validated JSON transformation recipe — **never executable JavaScript**.
 5. A trusted browser-local engine applies the recipe to the complete document.
 
-AI recipe generation is **not implemented yet**. The web workspace does **not** call the engine yet.
+**AI recipe generation is not implemented yet.** You can already build recipes manually and run them locally.
 
 ## Repository structure
 
 ```text
-apps/web/                         Next.js App Router product shell (Cloudflare OpenNext)
+apps/web/                         Next.js App Router + local Worker workspace
 packages/transformation-schema/   Transformation Plan v1 (Zod) schema
 packages/transformation-engine/   Allowlisted deterministic executor
 docs/audits/                      Legacy baseline audit
-docs/v2/                          Product blueprint, ADRs, plan specification
+docs/v2/                          Product blueprint, ADRs, plan + workspace specs
 docs/evidence/                    Evidence register
 ```
 
 ## Implemented now
 
-### Web scaffold
+### Local workspace (manual recipes)
+
+- Four-stage flow: Input → Recipe → Preview → Result
+- Manual editors for all eight Plan v1 operations, with reorder/enable/disable/remove
+- Built-in local templates (not AI-generated)
+- Schema validation via `@tft/transformation-schema`
+- Preview and full execution inside a **browser Web Worker**
+- Cancellation, stale-response protection, copy/download, restore original
+- See [`docs/v2/LOCAL_WORKSPACE_V1.md`](docs/v2/LOCAL_WORKSPACE_V1.md)
+
+### Schema and engine libraries
+
+- Strict Transformation Plan `schemaVersion: "1.0"`
+- Deterministic allowlisted executor
+- See [`docs/v2/TRANSFORMATION_PLAN_V1.md`](docs/v2/TRANSFORMATION_PLAN_V1.md)
+
+### Platform
 
 - Landing, workspace, privacy, and about routes
-- Local text input with character/line counts, clear, and plain-text file load
-- Honest UI states that recipe generation is unavailable
-- Lint, format, typecheck, unit/component tests, Playwright Chromium smoke, CI workflow
-- Cloudflare OpenNext Worker build configuration (not deployed from this milestone)
-
-### Schema and engine (library only)
-
-- Strict **Transformation Plan `schemaVersion: "1.0"`** in `@tft/transformation-schema` (Zod 4)
-- Eight allowlisted operations with closed-dispatch execution in `@tft/transformation-engine`
-- Structured success/failure results, UTF-8 byte limits, line-document semantics
-- Package unit tests and ESLint coverage
-
-See [`docs/v2/TRANSFORMATION_PLAN_V1.md`](docs/v2/TRANSFORMATION_PLAN_V1.md).
-
-The workspace UI still does **not** import or run the engine.
+- Lint, format, typecheck, unit/component/e2e tests, CI
+- Cloudflare OpenNext Worker build configuration (not deployed)
 
 ## Planned (not in this milestone)
 
-- Wiring the engine into the workspace / Web Worker
-- Server-side OpenAI integration with secrets kept off the client
-- Schema-constrained recipe generation
-- Preview/diff, progress, cancellation, bounded history, recipe export
-- Regex operations (future high-risk allowlist; not in v1)
-- Benchmarks (no performance claims yet)
+- AI / OpenAI recipe authoring
+- Schema-constrained model output on a server API
+- Intelligent representative sampling
+- Regex operations
+- Persistent sessions, CLI, npm publish, benchmarks
 
-See:
+## Docs
 
 - [`docs/v2/PRODUCT_BLUEPRINT.md`](docs/v2/PRODUCT_BLUEPRINT.md)
 - [`docs/v2/ARCHITECTURE_DECISIONS.md`](docs/v2/ARCHITECTURE_DECISIONS.md)
 - [`docs/v2/TRANSFORMATION_PLAN_V1.md`](docs/v2/TRANSFORMATION_PLAN_V1.md)
-- [`docs/audits/2026-07-28-legacy-v1-baseline.md`](docs/audits/2026-07-28-legacy-v1-baseline.md)
+- [`docs/v2/LOCAL_WORKSPACE_V1.md`](docs/v2/LOCAL_WORKSPACE_V1.md)
 - Legacy tag: `legacy-v1` → commit `8d3fa8c`
 
 ## Requirements
@@ -91,11 +93,11 @@ Open [http://localhost:3000](http://localhost:3000).
 | `npm run format:check` | Prettier check                                   |
 | `npm run typecheck`    | TypeScript across workspaces                     |
 | `npm run test`         | Vitest unit/component tests                      |
-| `npm run test:e2e`     | Playwright smoke (requires Chromium install)     |
+| `npm run test:e2e`     | Playwright tests (requires Chromium install)     |
 | `npm run ci`           | Aggregate local CI checks                        |
 
 ## Security notes
 
-- Do not reintroduce browser `dangerouslyAllowBrowser` OpenAI clients.
-- Do not execute model-generated JavaScript (`eval` / `new Function` / injected scripts).
+- Do not reintroduce browser OpenAI clients or `eval` / `new Function`.
+- Plan data selects only allowlisted engine operations.
 - Report vulnerabilities via GitHub security advisories (see `SECURITY.md`).

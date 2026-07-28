@@ -5,7 +5,7 @@
  * Browser and Web Worker compatible (TextEncoder; no Node Buffer).
  */
 
-export { executeTransformationPlan } from './execute.js';
+export { executeTransformationPlan } from './execute';
 
 export {
   DEFAULT_EXECUTION_LIMITS,
@@ -14,7 +14,7 @@ export {
   resolveExecutionLimits,
   type ExecutionLimits,
   type ExecutionOptions,
-} from './limits.js';
+} from './limits';
 
 export type {
   ExecutionResult,
@@ -26,7 +26,7 @@ export type {
   OperationExecutionReport,
   OperationReportStatus,
   OperationApplyResult,
-} from './types.js';
+} from './types';
 
 export {
   parseLineDocument,
@@ -34,4 +34,4 @@ export {
   type LineDocument,
   type LogicalLine,
   type LineEnding,
-} from './line-document.js';
+} from './line-document';
