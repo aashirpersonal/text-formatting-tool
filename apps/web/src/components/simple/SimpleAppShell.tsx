@@ -60,7 +60,7 @@ export function SimpleAppShell() {
   const [fileMeta, setFileMeta] = useState<FileMeta | null>(null);
   const [fileError, setFileError] = useState<string | null>(null);
   const [instruction, setInstruction] = useState('');
-  const [examplesOpen, setExamplesOpen] = useState(true);
+  const [examplesOpen, setExamplesOpen] = useState(false);
   const [generation, setGeneration] = useState<RecipeGenerationSuccess | null>(null);
   const [generationError, setGenerationError] = useState<string | null>(null);
   const [preview, setPreview] = useState<PreviewState | null>(null);
@@ -375,6 +375,8 @@ export function SimpleAppShell() {
 
   const friendlyPreview = preview ? summarizeExecution(preview.result) : [];
   const friendlyResult = fullResult ? summarizeExecution(fullResult) : [];
+  const featuredExamples = EXAMPLE_PROMPTS.slice(0, 3);
+  const moreExamples = EXAMPLE_PROMPTS.slice(3);
 
   const composer = (
     <div className="composer" data-testid="instruction-composer">
@@ -405,11 +407,32 @@ export function SimpleAppShell() {
         placeholder="Example: Remove duplicate lines, trim extra spaces and sort the list alphabetically."
         data-testid="instruction-input"
       />
+      <div
+        id="examples"
+        className="example-featured"
+        data-testid="example-featured"
+        role="group"
+        aria-label="Recommended examples"
+      >
+        <span className="example-label">Try:</span>
+        {featuredExamples.map((example) => (
+          <button
+            key={example.id}
+            type="button"
+            className="example-suggestion"
+            data-testid={`example-${example.id}`}
+            onClick={() => loadExample(example.instruction)}
+          >
+            {example.label}
+          </button>
+        ))}
+      </div>
       <div className="composer-actions">
         <button
           type="button"
           className="button button-secondary button-compact"
           aria-expanded={examplesOpen}
+          aria-controls="examples-menu"
           onClick={() => setExamplesOpen((value) => !value)}
           data-testid="examples-toggle"
         >
@@ -418,7 +441,11 @@ export function SimpleAppShell() {
         </button>
         <button
           type="button"
-          className="button button-primary"
+          className={
+            busy && status === 'generating'
+              ? 'button button-primary is-loading'
+              : 'button button-primary'
+          }
           disabled={!canGenerate}
           aria-disabled={!canGenerate}
           onClick={() => void generateTransformation()}
@@ -433,12 +460,14 @@ export function SimpleAppShell() {
         </button>
       </div>
       <div
-        id="examples"
-        className={examplesOpen ? 'example-chips is-open' : 'example-chips'}
+        id="examples-menu"
+        className={examplesOpen ? 'example-menu is-open' : 'example-menu'}
         role="group"
-        aria-label="Example transformations"
+        aria-label="More example transformations"
+        hidden={!examplesOpen}
+        data-testid="examples-menu"
       >
-        {EXAMPLE_PROMPTS.map((example) => (
+        {moreExamples.map((example) => (
           <button
             key={example.id}
             type="button"
@@ -519,7 +548,7 @@ export function SimpleAppShell() {
         />
         <button
           type="button"
-          className="button button-secondary button-compact"
+          className="button button-tertiary button-compact"
           onClick={() => {
             if (text.length > 0 && !window.confirm('Clear the current text?')) {
               return;
@@ -592,8 +621,25 @@ export function SimpleAppShell() {
 
       {!generation && !preview && !fullResult ? (
         <div className="empty-intelligence" data-testid="intelligence-empty">
-          <p>Generate a transformation to preview changes here.</p>
-          <p className="muted">Pick an example below the instruction field, then generate.</p>
+          <div className="empty-intelligence-icon" aria-hidden>
+            <Sparkles size={22} />
+          </div>
+          <h3>Your preview will appear here</h3>
+          <p className="muted">
+            Paste text, choose an example, then generate to review before and after.
+          </p>
+          <div className="empty-intelligence-actions">
+            {featuredExamples.slice(0, 2).map((example) => (
+              <button
+                key={`empty-${example.id}`}
+                type="button"
+                className="example-suggestion"
+                onClick={() => loadExample(example.instruction)}
+              >
+                {example.label}
+              </button>
+            ))}
+          </div>
         </div>
       ) : null}
 

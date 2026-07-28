@@ -3,7 +3,7 @@ import { AppChrome } from '@/components/app/AppChrome';
 
 export default function ApplicationLayout({ children }: { children: ReactNode }) {
   return (
-    <div className="app-root" data-testid="app-root">
+    <div className="app-root theme-warm-light" data-theme="warm-light" data-testid="app-root">
       <a className="skip-link" href="#app-main">
         Skip to workspace
       </a>

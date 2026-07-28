@@ -4,6 +4,10 @@ All notable changes to this project will be documented in this file.
 
 ## Unreleased
 
+### Changed
+
+- Default application and marketing visuals switched to a warm light productivity theme with shared design tokens, button hierarchy (primary/secondary/tertiary/destructive/disabled), and reduced example-prompt density.
+
 ### Added
 
 - Full-viewport application shell for `/app` and `/app/advanced` (no marketing footer).

@@ -29,6 +29,7 @@ describe('AppChrome', () => {
     render(<AppChrome />);
     expect(screen.getByTestId('prototype-notice')).toHaveTextContent(/prototype/i);
     expect(screen.getByTestId('advanced-editor-link')).toHaveAttribute('href', '/app/advanced');
+    expect(screen.getByTestId('rail-new')).toHaveClass('is-active');
     const toggle = screen.getByTestId('app-menu-toggle');
     expect(toggle).toHaveAttribute('aria-expanded', 'false');
     await user.click(toggle);

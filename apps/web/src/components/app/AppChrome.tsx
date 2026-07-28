@@ -20,6 +20,7 @@ export function AppChrome() {
   const [menuOpen, setMenuOpen] = useState(false);
   const menuId = useId();
   const isAdvanced = pathname.startsWith('/app/advanced');
+  const isAppHome = pathname === '/app' || pathname === '/app/';
 
   useEffect(() => {
     if (!menuOpen) {
@@ -58,9 +59,8 @@ export function AppChrome() {
             <Plus size={16} aria-hidden />
             New transformation
           </Link>
-          <span className="status-badge" role="status" data-testid="prototype-notice">
-            <Sparkles size={14} aria-hidden />
-            Prototype · local examples only
+          <span className="prototype-badge" role="status" data-testid="prototype-notice">
+            Prototype
           </span>
         </div>
 
@@ -132,10 +132,12 @@ export function AppChrome() {
 
       <aside className="app-rail" aria-label="Workspace utilities" data-testid="app-rail">
         <Link
-          className="rail-item"
+          className={isAppHome && !isAdvanced ? 'rail-item is-active' : 'rail-item'}
           href="/app"
           title="New transformation"
           aria-label="New transformation"
+          aria-current={isAppHome && !isAdvanced ? 'page' : undefined}
+          data-testid="rail-new"
         >
           <Plus size={18} aria-hidden />
           <span>New</span>

@@ -20,6 +20,23 @@ async function expectNoHorizontalOverflow(page: import('@playwright/test').Page)
   expect(overflow).toBe(false);
 }
 
+test('warm light shell tokens and empty preview copy', async ({ page }) => {
+  await page.setViewportSize({ width: 1440, height: 900 });
+  await page.goto('/app');
+  await expect(page.getByTestId('app-root')).toHaveAttribute('data-theme', 'warm-light');
+  await expect(page.getByTestId('intelligence-empty')).toContainText(
+    /your preview will appear here/i,
+  );
+  await expect(page.getByTestId('example-featured').locator('button')).toHaveCount(3);
+  await expect(page.getByTestId('examples-menu')).toBeHidden();
+  await expect(page.getByTestId('generate-transformation')).toBeDisabled();
+  await expect(page.getByTestId('generate-transformation')).toHaveClass(/button-primary/);
+  const canvas = await page.evaluate(() =>
+    getComputedStyle(document.documentElement).getPropertyValue('--canvas').trim(),
+  );
+  expect(canvas.toLowerCase()).toBe('#f4f1eb');
+});
+
 test('desktop simple flow: example generate preview apply', async ({ page }) => {
   await page.setViewportSize({ width: 1280, height: 800 });
   await page.goto('/app');

@@ -113,4 +113,26 @@ describe('SimpleAppShell', () => {
     expect(screen.getByTestId('mobile-tab-preview')).toBeDisabled();
     expect(screen.getByTestId('mobile-tab-result')).toBeDisabled();
   });
+
+  it('uses the warm light button system and reduced example density', () => {
+    render(<SimpleAppShell />);
+    const generate = screen.getByTestId('generate-transformation');
+    expect(generate).toHaveClass('button-primary');
+    expect(generate).toBeDisabled();
+    expect(generate).toHaveAttribute('aria-disabled', 'true');
+    expect(screen.getByTestId('clear-input')).toHaveClass('button-tertiary');
+    expect(screen.getByTestId('example-featured').querySelectorAll('button')).toHaveLength(3);
+    expect(screen.getByTestId('examples-menu')).not.toBeVisible();
+    expect(screen.getByTestId('intelligence-empty')).toHaveTextContent(
+      /your preview will appear here/i,
+    );
+  });
+
+  it('reveals remaining examples from the dropdown', async () => {
+    const user = userEvent.setup();
+    render(<SimpleAppShell />);
+    await user.click(screen.getByTestId('examples-toggle'));
+    expect(screen.getByTestId('examples-menu')).toBeVisible();
+    expect(screen.getByTestId('example-bullet')).toBeVisible();
+  });
 });

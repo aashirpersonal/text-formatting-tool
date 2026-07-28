@@ -50,7 +50,10 @@ export function LandingMotion() {
         .to('.demo-before', { opacity: 0.35, duration: 0.25 })
         .from('.demo-after', { opacity: 0, y: 8, duration: 0.45 })
         .from('.demo-status', { opacity: 0, scale: 0.95, duration: 0.35 })
-        .from('.landing-cta-primary', { boxShadow: '0 0 0 rgba(139,133,255,0)', duration: 0.4 });
+        .from('.landing-cta-primary', {
+          boxShadow: '0 0 0 rgba(102,87,217,0)',
+          duration: 0.4,
+        });
 
       gsap.from('.benefit-item', {
         scrollTrigger: {
