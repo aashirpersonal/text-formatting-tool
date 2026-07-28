@@ -2,6 +2,7 @@ import type { NextConfig } from 'next';
 
 const nextConfig: NextConfig = {
   transpilePackages: ['@tft/transformation-schema', '@tft/transformation-engine'],
+  serverExternalPackages: ['openai'],
   poweredByHeader: false,
   async headers() {
     return [

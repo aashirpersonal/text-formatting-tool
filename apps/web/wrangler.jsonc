@@ -21,4 +21,8 @@
       "service": "text-formatting-tool",
     },
   ],
+  // Rate limiting: RecipeGenerationRateLimiter exists in application code with an
+  // in-memory local/dev implementation. A Cloudflare Rate Limiting binding is not
+  // wired or claimed active in this milestone. Add a validated binding later, e.g.:
+  // "unsafe": { "bindings": [{ "name": "RECIPE_RATE_LIMITER", "type": "ratelimit", ... }] }
 }

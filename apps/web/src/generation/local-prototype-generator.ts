@@ -158,8 +158,8 @@ const UNSUPPORTED_MESSAGE =
  * Not AI. No network. Returns schema-validated Transformation Plan v1 objects only.
  */
 export class LocalPrototypeRecipeGenerator implements RecipeGenerationAdapter {
-  readonly modeLabel =
-    'Prototype mode: example transformations only. AI generation is not connected yet.';
+  readonly modeLabel = 'Prototype mode: example transformations only. No AI request is made.';
+  readonly requiresSampleReview = false;
 
   async generate(request: RecipeGenerationRequest): Promise<RecipeGenerationResult> {
     const normalized = normalizeInstruction(request.instruction);

@@ -6,6 +6,7 @@
  */
 
 export { PLAN_LIMITS, type PlanLimits } from './limits';
+export { RECIPE_GENERATION_LIMITS, type RecipeGenerationLimits } from './generation-limits';
 
 export {
   OPERATION_TYPES,
@@ -39,4 +40,26 @@ export {
   type SafeParseTransformationPlanResult,
 } from './plan';
 
+export {
+  RECIPE_GENERATION_RESULT_VERSION,
+  recipeGenerationResultSchema,
+  parseRecipeGenerationResult,
+  safeParseRecipeGenerationResult,
+  type RecipeGenerationResultEnvelope,
+  type SafeParseRecipeGenerationResult,
+} from './generation-result';
+
+export {
+  recipeGenerationApiRequestSchema,
+  parseRecipeGenerationApiRequest,
+  safeParseRecipeGenerationApiRequest,
+  type RecipeGenerationApiRequest,
+  type RecipeGenerationApiSample,
+  type SafeParseRecipeGenerationApiRequest,
+} from './generation-request';
+
 export { getTransformationPlanJsonSchema, transformationPlanJsonSchema } from './json-schema';
+export {
+  getRecipeGenerationResultJsonSchema,
+  recipeGenerationResultJsonSchema,
+} from './generation-json-schema';

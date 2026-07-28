@@ -51,12 +51,18 @@ It:
 - returns schema-valid Transformation Plan v1 objects
 - uses no network
 - never executes JavaScript
-- never claims to be AI
-- shows: “Prototype mode: example transformations only. AI generation is not connected yet.”
+- never claims prototype output was produced by AI
+- shows an accurate Prototype mode badge
 
-Arbitrary unsupported instructions receive:
+OpenAI mode (`RECIPE_GENERATOR_MODE=openai`) adds sample review, then same-origin recipe generation. See `docs/v2/AI_RECIPE_GENERATION_V1.md`.
+
+Arbitrary unsupported instructions receive (prototype):
 
 > This prototype currently supports the example transformations above. Flexible AI instructions are coming next.
+
+Unsupported OpenAI / engine-limit copy:
+
+> This request needs open-ended writing or reasoning that the local transformation engine cannot safely reproduce.
 
 ## Accessibility approach
 
@@ -81,14 +87,14 @@ Arbitrary unsupported instructions receive:
 
 **Not claimed yet.** Before launch readiness, the product still needs:
 
-- live secure AI generation
+- founder-verified live OpenAI configuration (optional for CI)
 - polished marketing copy review
 - real Product Hunt assets and launch plan
 - dependency audit remediation where feasible without breaking OpenNext/Next
 
 ## Remaining work before launch
 
-- Connect a secure server-side schema-constrained AI generator behind `RecipeGenerationAdapter`
+- Validate Cloudflare Rate Limiting binding in production (not claimed active yet)
 - Keep the prototype adapter replaceable without UX churn
 - Continue mobile QA on physical devices
-- Avoid absolute privacy claims (future AI may send approved samples + instruction)
+- Avoid absolute privacy claims (OpenAI mode may send approved samples + instruction)

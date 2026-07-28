@@ -12,16 +12,16 @@ Text Formatting Tool is intended to become an AI-guided, deterministic, privacy-
 4. The model returns a validated JSON transformation recipe — **never executable JavaScript**.
 5. A trusted browser-local engine applies the recipe to the complete document.
 
-**AI recipe generation is not implemented yet.** The `/app` flow uses a local prototype adapter for approved examples only. You can also build recipes manually in `/app/advanced`.
+**AI recipe generation is implemented behind `RECIPE_GENERATOR_MODE`.** Default `prototype` mode stays fully local. OpenAI mode uses a same-origin server endpoint, sample review, and schema-validated Transformation Plans — never executable JavaScript. See [`docs/v2/AI_RECIPE_GENERATION_V1.md`](docs/v2/AI_RECIPE_GENERATION_V1.md).
 
 ## Repository structure
 
 ```text
-apps/web/                         Next.js App Router + local Worker workspace
-packages/transformation-schema/   Transformation Plan v1 (Zod) schema
+apps/web/                         Next.js App Router + local Worker workspace + recipe API
+packages/transformation-schema/   Transformation Plan v1 + generation request/result schemas
 packages/transformation-engine/   Allowlisted deterministic executor
 docs/audits/                      Legacy baseline audit
-docs/v2/                          Product blueprint, ADRs, plan + workspace specs
+docs/v2/                          Product blueprint, ADRs, plan + workspace + AI specs
 docs/evidence/                    Evidence register
 ```
 
@@ -31,7 +31,7 @@ docs/evidence/                    Evidence register
 
 - Paste text or choose a file
 - Describe the change with example prompts
-- Prototype generator (examples only — not live AI)
+- Prototype generator (default) or OpenAI mode with sample review
 - Preview before/after, then apply locally in a Web Worker
 - Copy / download / restore original
 - Full-viewport app shell (see [`docs/v2/APP_SHELL_AND_MOTION_V1.md`](docs/v2/APP_SHELL_AND_MOTION_V1.md) and [`docs/v2/UX_RESET_V1.md`](docs/v2/UX_RESET_V1.md))
@@ -47,7 +47,8 @@ docs/evidence/                    Evidence register
 
 - Strict Transformation Plan `schemaVersion: "1.0"`
 - Deterministic allowlisted executor
-- See [`docs/v2/TRANSFORMATION_PLAN_V1.md`](docs/v2/TRANSFORMATION_PLAN_V1.md)
+- Recipe generation request/result envelopes
+- See [`docs/v2/TRANSFORMATION_PLAN_V1.md`](docs/v2/TRANSFORMATION_PLAN_V1.md) and [`docs/v2/AI_RECIPE_GENERATION_V1.md`](docs/v2/AI_RECIPE_GENERATION_V1.md)
 
 ### Platform
 
@@ -55,18 +56,19 @@ docs/evidence/                    Evidence register
 - Lint, format, typecheck, unit/component/e2e tests, CI
 - Cloudflare OpenNext Worker build configuration (not deployed)
 
-## Planned (not in this milestone)
+## Planned (not claimed done)
 
-- AI / OpenAI recipe authoring
-- Schema-constrained model output on a server API
-- Intelligent representative sampling
+- Intelligent representative sampling (beyond start/middle/end)
+- Validated Cloudflare Rate Limiting binding in production
 - Regex operations
 - Persistent sessions, CLI, npm publish, benchmarks
+- Public production deployment
 
 ## Docs
 
 - [`docs/v2/PRODUCT_BLUEPRINT.md`](docs/v2/PRODUCT_BLUEPRINT.md)
 - [`docs/v2/ARCHITECTURE_DECISIONS.md`](docs/v2/ARCHITECTURE_DECISIONS.md)
+- [`docs/v2/AI_RECIPE_GENERATION_V1.md`](docs/v2/AI_RECIPE_GENERATION_V1.md)
 - [`docs/v2/TRANSFORMATION_PLAN_V1.md`](docs/v2/TRANSFORMATION_PLAN_V1.md)
 - [`docs/v2/LOCAL_WORKSPACE_V1.md`](docs/v2/LOCAL_WORKSPACE_V1.md)
 - Legacy tag: `legacy-v1` → commit `8d3fa8c`
@@ -87,6 +89,8 @@ npm run dev
 
 Open [http://localhost:3000](http://localhost:3000).
 
+Default recipe mode is **prototype** (no API key required). To enable OpenAI mode locally, copy `.env.example` values into a gitignored `apps/web/.env.local`, set `RECIPE_GENERATOR_MODE=openai`, `OPENAI_MODEL`, and `OPENAI_API_KEY`, then restart `npm run dev`. Never commit the local env file.
+
 ## Commands
 
 | Command                | Purpose                                          |
@@ -105,5 +109,6 @@ Open [http://localhost:3000](http://localhost:3000).
 ## Security notes
 
 - Do not reintroduce browser OpenAI clients or `eval` / `new Function`.
+- OpenAI SDK stays server-only; keys never use `NEXT_PUBLIC_*`.
 - Plan data selects only allowlisted engine operations.
 - Report vulnerabilities via GitHub security advisories (see `SECURITY.md`).

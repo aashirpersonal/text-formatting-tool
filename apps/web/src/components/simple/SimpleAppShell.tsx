@@ -15,11 +15,18 @@ import {
 } from 'lucide-react';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import {
-  EXAMPLE_PROMPTS,
-  LocalPrototypeRecipeGenerator,
-} from '@/generation/local-prototype-generator';
+  createRecipeGenerator,
+  fetchRecipeGeneratorStatus,
+} from '@/generation/create-recipe-generator';
+import { EXAMPLE_PROMPTS } from '@/generation/local-prototype-generator';
 import { summarizeExecution } from '@/generation/friendly-report';
-import type { RecipeGenerationSuccess } from '@/generation/types';
+import { selectDocumentSamples, type DocumentSample } from '@/generation/select-document-samples';
+import type {
+  PublicRecipeGeneratorStatus,
+  RecipeGenerationAdapter,
+  RecipeGenerationSuccess,
+} from '@/generation/types';
+import { SampleReviewPanel } from '@/components/simple/SampleReviewPanel';
 import { buildPreviewSample } from '@/lib/preview-sample';
 import {
   MAX_INPUT_BYTES,
@@ -36,7 +43,7 @@ import {
   isWorkerCancellation,
 } from '@/worker/transformation-worker-client';
 
-type Phase = 'compose' | 'ready' | 'preview' | 'result';
+type Phase = 'compose' | 'review' | 'ready' | 'preview' | 'result';
 type MobileTab = 'text' | 'preview' | 'result';
 type ProcessStatus = 'idle' | 'generating' | 'processing' | 'completed' | 'cancelled' | 'failed';
 type FileMeta = { name: string; size: number };
@@ -46,21 +53,42 @@ type PreviewState = {
   result: Extract<ExecutionResult, { ok: true }>;
 };
 
-const generator = new LocalPrototypeRecipeGenerator();
+type SimpleAppShellProps = {
+  readonly initialStatus?: PublicRecipeGeneratorStatus;
+  readonly generatorOverride?: RecipeGenerationAdapter;
+  readonly initialDocument?: string;
+  readonly initialInstruction?: string;
+};
 
-export function SimpleAppShell() {
+export function SimpleAppShell({
+  initialStatus,
+  generatorOverride,
+  initialDocument = '',
+  initialInstruction = '',
+}: SimpleAppShellProps = {}) {
   const workerRef = useRef<TransformationWorkerClient | null>(null);
   const runIdRef = useRef(0);
+  const generateAbortRef = useRef<AbortController | null>(null);
   const instructionRef = useRef<HTMLTextAreaElement | null>(null);
+  const [generatorStatus, setGeneratorStatus] = useState<PublicRecipeGeneratorStatus>(
+    initialStatus ?? { mode: 'prototype', openaiReady: false },
+  );
+  const [generator, setGenerator] = useState<RecipeGenerationAdapter>(
+    () =>
+      generatorOverride ??
+      createRecipeGenerator(initialStatus ?? { mode: 'prototype', openaiReady: false }),
+  );
   const [phase, setPhase] = useState<Phase>('compose');
   const [mobileTab, setMobileTab] = useState<MobileTab>('text');
-  const [text, setText] = useState('');
-  const [originalText, setOriginalText] = useState('');
+  const [text, setText] = useState(initialDocument);
+  const [originalText, setOriginalText] = useState(initialDocument);
   const [originalLocked, setOriginalLocked] = useState(false);
   const [fileMeta, setFileMeta] = useState<FileMeta | null>(null);
   const [fileError, setFileError] = useState<string | null>(null);
-  const [instruction, setInstruction] = useState('');
+  const [instruction, setInstruction] = useState(initialInstruction);
   const [examplesOpen, setExamplesOpen] = useState(false);
+  const [reviewSamples, setReviewSamples] = useState<DocumentSample[]>([]);
+  const [autoSamples, setAutoSamples] = useState<DocumentSample[]>([]);
   const [generation, setGeneration] = useState<RecipeGenerationSuccess | null>(null);
   const [generationError, setGenerationError] = useState<string | null>(null);
   const [preview, setPreview] = useState<PreviewState | null>(null);
@@ -78,10 +106,28 @@ export function SimpleAppShell() {
     workerRef.current = new TransformationWorkerClient();
     return () => {
       runIdRef.current += 1;
+      generateAbortRef.current?.abort();
       workerRef.current?.dispose();
       workerRef.current = null;
     };
   }, []);
+
+  useEffect(() => {
+    if (generatorOverride || initialStatus) {
+      return;
+    }
+    let cancelled = false;
+    void fetchRecipeGeneratorStatus().then((next) => {
+      if (cancelled) {
+        return;
+      }
+      setGeneratorStatus(next);
+      setGenerator(createRecipeGenerator(next));
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, [generatorOverride, initialStatus]);
 
   useEffect(() => {
     const openExamples = () => {
@@ -99,17 +145,25 @@ export function SimpleAppShell() {
   const canGenerate = text.trim().length > 0 && instruction.trim().length > 0 && !busy;
   const canPreview = Boolean(generation) && text.trim().length > 0 && !busy;
   const canApply = Boolean(preview) && !busy;
-  const previewEnabled = Boolean(generation || preview);
   const resultEnabled = Boolean(fullResult) || phase === 'result';
 
   function invalidateDownstream(message: string) {
+    generateAbortRef.current?.abort();
+    generateAbortRef.current = null;
     setGeneration(null);
     setGenerationError(null);
     setPreview(null);
     setFullResult(null);
+    setReviewSamples([]);
+    setAutoSamples([]);
     setErrorMessage(null);
     setCopyMessage(null);
-    if (status === 'completed' || status === 'failed' || status === 'cancelled') {
+    if (
+      status === 'completed' ||
+      status === 'failed' ||
+      status === 'cancelled' ||
+      status === 'generating'
+    ) {
       setStatus('idle');
     }
     setStatusMessage(message);
@@ -174,6 +228,8 @@ export function SimpleAppShell() {
     setGenerationError(null);
     setPreview(null);
     setFullResult(null);
+    setReviewSamples([]);
+    setAutoSamples([]);
     setPhase('compose');
     setMobileTab('text');
     setExamplesOpen(false);
@@ -181,42 +237,129 @@ export function SimpleAppShell() {
     instructionRef.current?.focus();
   }
 
-  async function generateTransformation() {
-    if (!canGenerate) {
-      return;
-    }
+  function openSampleReview() {
+    const selected = selectDocumentSamples(text);
+    setAutoSamples(selected);
+    setReviewSamples(selected);
+    setGeneration(null);
+    setGenerationError(null);
+    setPreview(null);
+    setFullResult(null);
+    setPhase('review');
+    setMobileTab('preview');
+    setStatus('idle');
+    setStatusMessage('Review the excerpts that will be sent, then generate safely.');
+  }
+
+  async function runGeneration(samples?: readonly DocumentSample[]) {
     setOriginalLocked(true);
     setOriginalText(text);
     setStatus('generating');
-    setStatusMessage('Building a prototype transformation…');
+    setStatusMessage(
+      generator.requiresSampleReview
+        ? 'Creating a safe transformation…'
+        : 'Building a prototype transformation…',
+    );
     setGenerationError(null);
     setErrorMessage(null);
     setPreview(null);
     setFullResult(null);
+
+    const abort = new AbortController();
+    generateAbortRef.current?.abort();
+    generateAbortRef.current = abort;
+
     try {
-      const result = await generator.generate({ instruction });
+      const result = await generator.generate({
+        instruction,
+        samples,
+        documentMetadata: samples
+          ? {
+              characters,
+              lines,
+              bytes,
+              ...(fileMeta?.name.includes('.')
+                ? { fileExtension: fileMeta.name.split('.').pop()?.slice(0, 16) }
+                : {}),
+            }
+          : undefined,
+        signal: abort.signal,
+      });
+      if (abort.signal.aborted) {
+        setStatus('cancelled');
+        setStatusMessage('Generation cancelled.');
+        return;
+      }
       if (!result.ok) {
         setGeneration(null);
         setGenerationError(result.message);
-        setStatus('idle');
-        setStatusMessage('Choose an example transformation to continue.');
+        setStatus(result.code === 'CANCELLED' ? 'cancelled' : 'idle');
+        if (result.code === 'UNSUPPORTED_INSTRUCTION') {
+          setStatusMessage('This request is outside the local transformation engine.');
+        } else if (result.code === 'RATE_LIMITED') {
+          setStatusMessage('Rate limited. Wait a moment and try again.');
+        } else if (result.code === 'CONFIGURATION_UNAVAILABLE') {
+          setStatusMessage('AI recipe generation is not configured yet.');
+        } else if (result.code === 'CANCELLED') {
+          setStatusMessage('Generation cancelled.');
+        } else {
+          setStatusMessage('Generation did not succeed.');
+        }
         setPhase('compose');
         setMobileTab('text');
         return;
       }
+      setReviewSamples([]);
       setGeneration(result);
       setStatus('idle');
       setStatusMessage('Transformation ready. Preview the changes before applying.');
       setPhase('ready');
       setMobileTab('preview');
     } catch (error) {
+      if (abort.signal.aborted) {
+        setStatus('cancelled');
+        setStatusMessage('Generation cancelled.');
+        return;
+      }
       setGeneration(null);
       setGenerationError(
         error instanceof Error ? error.message : 'Could not build a transformation.',
       );
       setStatus('failed');
       setStatusMessage('Generation failed.');
+    } finally {
+      if (generateAbortRef.current === abort) {
+        generateAbortRef.current = null;
+      }
     }
+  }
+
+  async function generateTransformation() {
+    if (!canGenerate) {
+      return;
+    }
+    if (generator.requiresSampleReview) {
+      openSampleReview();
+      return;
+    }
+    await runGeneration();
+  }
+
+  async function approveSampleReview() {
+    if (reviewSamples.length === 0) {
+      setGenerationError('Keep at least one excerpt to generate safely.');
+      return;
+    }
+    await runGeneration(reviewSamples);
+  }
+
+  function cancelSampleReview() {
+    setReviewSamples([]);
+    setAutoSamples([]);
+    setPhase('compose');
+    setMobileTab('text');
+    setStatus('idle');
+    setStatusMessage('Sample review cancelled. Nothing was sent.');
   }
 
   async function runPreview() {
@@ -321,7 +464,14 @@ export function SimpleAppShell() {
 
   function cancelProcessing() {
     runIdRef.current += 1;
+    generateAbortRef.current?.abort();
+    generateAbortRef.current = null;
     workerRef.current?.cancel();
+    if (status === 'generating') {
+      setStatus('cancelled');
+      setStatusMessage('Generation cancelled.');
+      return;
+    }
     setStatus('cancelled');
     setErrorMessage(null);
     setStatusMessage('Cancelled. Previous successful results were kept.');
@@ -374,6 +524,8 @@ export function SimpleAppShell() {
     setGenerationError(null);
     setPreview(null);
     setFullResult(null);
+    setReviewSamples([]);
+    setAutoSamples([]);
     setStatus('idle');
     setStatusMessage('Paste text, then describe what should change.');
     setErrorMessage(null);
@@ -388,6 +540,18 @@ export function SimpleAppShell() {
   const moreExamples = EXAMPLE_PROMPTS.slice(2);
   const canRestore = originalText.length > 0 && text !== originalText;
   const fileLimitLabel = formatBytes(MAX_INPUT_BYTES);
+  const openaiMode = generatorStatus.mode === 'openai';
+  const previewEnabled = Boolean(generation || preview || phase === 'review');
+  const modeHint = openaiMode
+    ? 'AI recipes · local execution · ⌘/Ctrl+Enter'
+    : 'Prototype mode · ⌘/Ctrl+Enter';
+  const modeBadge = generation
+    ? generation.prototype
+      ? 'Prototype'
+      : 'AI recipes · local execution'
+    : openaiMode
+      ? 'AI recipes · local execution'
+      : 'Prototype';
 
   const composer = (
     <div className="composer composer-card" data-testid="instruction-composer">
@@ -406,6 +570,8 @@ export function SimpleAppShell() {
           setGenerationError(null);
           setPreview(null);
           setFullResult(null);
+          setReviewSamples([]);
+          setAutoSamples([]);
           setPhase('compose');
         }}
         onKeyDown={(event) => {
@@ -449,8 +615,16 @@ export function SimpleAppShell() {
             Examples
             <ChevronDown size={16} aria-hidden />
           </button>
-          <span className="composer-proto muted" data-testid="composer-prototype-hint">
-            Prototype mode · ⌘/Ctrl+Enter
+          <span
+            className="composer-proto muted"
+            data-testid="composer-prototype-hint"
+            title={
+              openaiMode
+                ? 'Only approved excerpts are sent. The complete document stays in your browser.'
+                : generator.modeLabel
+            }
+          >
+            {modeHint}
           </span>
         </div>
         <button
@@ -495,9 +669,33 @@ export function SimpleAppShell() {
         ))}
       </div>
       {generationError ? (
-        <p className="error-text" role="alert" data-testid="generation-error">
-          {generationError}
-        </p>
+        <div className="stack" data-testid="generation-error-block">
+          <p className="error-text" role="alert" data-testid="generation-error">
+            {generationError}
+          </p>
+          {/open-ended writing|outside the local transformation|prototype currently supports/i.test(
+            generationError,
+          ) ? (
+            <div className="actions wrap-actions">
+              <button
+                type="button"
+                className="button button-secondary button-compact"
+                onClick={() => instructionRef.current?.focus()}
+                data-testid="edit-instruction-from-unsupported"
+              >
+                Edit instruction
+              </button>
+              <button
+                type="button"
+                className="button button-tertiary button-compact"
+                onClick={() => setExamplesOpen(true)}
+                data-testid="try-example-from-unsupported"
+              >
+                Try an example
+              </button>
+            </div>
+          ) : null}
+        </div>
       ) : null}
     </div>
   );
@@ -625,11 +823,13 @@ export function SimpleAppShell() {
         <h2 id="intelligence-heading">
           {phase === 'result'
             ? 'Result'
-            : phase === 'preview' || preview
-              ? 'Preview'
-              : generation
-                ? 'Transformation'
-                : 'Preview'}
+            : phase === 'review'
+              ? 'Review'
+              : phase === 'preview' || preview
+                ? 'Preview'
+                : generation
+                  ? 'Transformation'
+                  : 'Preview'}
         </h2>
         <p className="status-line" aria-live="polite" data-testid="simple-status">
           {busy ? <Loader2 className="spin-icon" aria-hidden size={16} /> : null}
@@ -653,7 +853,7 @@ export function SimpleAppShell() {
         </p>
       ) : null}
 
-      {!generation && !preview && !fullResult ? (
+      {!generation && !preview && !fullResult && phase !== 'review' ? (
         <div className="empty-intelligence" data-testid="intelligence-empty">
           <div className="preview-empty-visual" aria-hidden="true">
             <div className="preview-empty-card is-messy">
@@ -679,11 +879,40 @@ export function SimpleAppShell() {
         </div>
       ) : null}
 
+      {phase === 'review' ? (
+        <SampleReviewPanel
+          instruction={instruction}
+          samples={reviewSamples}
+          documentCharacters={characters}
+          busy={busy}
+          onChangeSample={(id, nextText) => {
+            setReviewSamples((current) =>
+              current.map((sample) => (sample.id === id ? { ...sample, text: nextText } : sample)),
+            );
+          }}
+          onRemoveSample={(id) => {
+            setReviewSamples((current) => current.filter((sample) => sample.id !== id));
+          }}
+          onRestoreSamples={() => setReviewSamples(autoSamples)}
+          onCancel={cancelSampleReview}
+          onApprove={() => void approveSampleReview()}
+        />
+      ) : null}
+
+      {status === 'generating' ? (
+        <div className="stack intelligence-block" data-testid="generating-state">
+          <p style={{ margin: 0 }}>Creating a safe transformation…</p>
+          <div className="progress-pulse" aria-hidden="true" />
+        </div>
+      ) : null}
+
       {generation && (phase === 'ready' || phase === 'preview' || phase === 'result') ? (
         <div className="stack intelligence-block" data-testid="generation-summary">
           <div className="meta-row">
             <strong>{generation.title}</strong>
-            <span className="badge badge-soft">Prototype</span>
+            <span className="badge badge-soft" data-testid="generation-mode-badge">
+              {modeBadge}
+            </span>
           </div>
           <p style={{ margin: 0 }}>{generation.explanation}</p>
           {generation.assumptions.length > 0 || generation.warnings.length > 0 ? (

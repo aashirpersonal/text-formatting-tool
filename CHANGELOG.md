@@ -4,7 +4,24 @@ All notable changes to this project will be documented in this file.
 
 ## Unreleased
 
+### Added
+
+- Secure schema-constrained AI recipe generation behind `RECIPE_GENERATOR_MODE=prototype|openai`.
+- Same-origin `POST /api/recipes/generate` with request limits, sample-review UX, Structured Outputs, and generation-result envelope validation.
+- Deterministic start/middle/end sample selection, rate-limit abstraction, and `docs/v2/AI_RECIPE_GENERATION_V1.md`.
+- Official server-only `openai` SDK dependency (`openai@7.1.0`).
+
 ### Changed
+
+- Privacy page distinguishes prototype vs OpenAI modes without overclaiming retention.
+- App chrome/composer badges reflect the active generator mode.
+
+### Security
+
+- Complete documents are rejected by the recipe endpoint; browser bundles must not include API keys or the OpenAI client.
+- Model output is Zod-validated Transformation Plan v1 only — never executable JavaScript.
+
+### Changed (earlier)
 
 - Polished the warm light app shell: document-style editor, unified docked composer, single examples system, richer preview empty state, and demoted Advanced to the app menu.
 - Default application and marketing visuals switched to a warm light productivity theme with shared design tokens, button hierarchy (primary/secondary/tertiary/destructive/disabled), and reduced example-prompt density.
@@ -48,8 +65,7 @@ All notable changes to this project will be documented in this file.
 
 ### Security
 
-- Workspace transformations run locally in a Web Worker; no AI/network upload path in this milestone.
+- Workspace transformations run locally in a Web Worker; full-document processing is never offloaded to the recipe endpoint.
 - Schema and engine reject executable code fields; dispatch uses a closed allowlist with no `eval` / `Function` / `new Function`.
-- No AI integration and no model-generated code execution in this milestone.
+- OpenAI integration is server-only when enabled; prototype mode makes no AI request.
 - Legacy CRA AI path that executed model-generated JavaScript is not carried forward into the v2 scaffold.
-- No OpenAI client or API key is included in this scaffold.

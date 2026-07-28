@@ -288,6 +288,20 @@ These ADRs record **approved direction**. They do not claim that the v2 applicat
 
 ---
 
+## ADR-020: Schema-constrained server-side AI recipe generation
+
+| Field                     | Content                                                                                                                                                                                                                                                           |
+| ------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Status**                | Accepted — 2026-07-28 (implemented on `v2-rebuild`; not deployed)                                                                                                                                                                                                 |
+| **Context**               | ADR-007/008/014/015 require instruction + approved samples only, local full-document execution, server-side OpenAI, and schema-constrained output. The product still needs a local prototype path for development without keys.                                   |
+| **Decision**              | Support `RECIPE_GENERATOR_MODE=prototype\|openai`. OpenAI mode uses `POST /api/recipes/generate` with Responses API Structured Outputs, generation-result envelope validation, sample-review UX, and Worker-only preview/apply. Never send the complete document. |
+| **Reasons**               | Preserve the simple product experience while closing the legacy unsafe AI path; keep tests free of live keys; make privacy claims accurate per mode.                                                                                                              |
+| **Alternatives rejected** | Browser OpenAI SDK; executing model JS; silent full-document upload; removing the prototype generator; claiming Cloudflare rate limiting without a validated binding.                                                                                             |
+| **Consequences**          | Docs in `docs/v2/AI_RECIPE_GENERATION_V1.md`; privacy page distinguishes modes; production secrets via Worker secret later; live provider verification is founder-local only.                                                                                     |
+| **Unresolved questions**  | Cloudflare Rate Limiting binding wiring; calibrated sampling beyond start/middle/end.                                                                                                                                                                             |
+
+---
+
 ## Summary table
 
 | ADR | Title                                                | Status             |
@@ -311,3 +325,4 @@ These ADRs record **approved direction**. They do not claim that the v2 applicat
 | 017 | Threat model + reproducible benchmarks               | Accepted           |
 | 018 | Hide recipes; simple mobile-first primary UX         | Accepted           |
 | 019 | Full-viewport app shell + GSAP homepage              | Accepted           |
+| 020 | Schema-constrained server-side AI recipe generation  | Accepted (local)   |

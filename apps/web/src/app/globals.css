@@ -1275,6 +1275,61 @@ button.chip:hover {
   font-size: 0.8rem;
 }
 
+.ai-privacy-hint {
+  font-size: 0.75rem;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+  white-space: nowrap;
+}
+
+.sample-review-summary {
+  font-size: 0.9rem;
+  font-weight: 600;
+}
+
+.sample-review-item {
+  display: grid;
+  gap: var(--space-2);
+  padding: var(--space-3);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  background: color-mix(in srgb, var(--surface) 92%, var(--canvas));
+}
+
+.sample-review-instruction h3,
+.sample-review-item strong {
+  margin: 0;
+}
+
+.progress-pulse {
+  height: 4px;
+  border-radius: 999px;
+  background: linear-gradient(
+    90deg,
+    color-mix(in srgb, var(--primary) 15%, transparent),
+    color-mix(in srgb, var(--primary) 55%, transparent),
+    color-mix(in srgb, var(--primary) 15%, transparent)
+  );
+  background-size: 200% 100%;
+  animation: tft-progress-pulse 1.4s ease-in-out infinite;
+}
+
+@keyframes tft-progress-pulse {
+  0% {
+    background-position: 100% 0;
+  }
+  100% {
+    background-position: -100% 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .progress-pulse {
+    animation: none;
+    opacity: 0.7;
+  }
+}
+
 .composer-input {
   min-height: 5.25rem;
   resize: vertical;

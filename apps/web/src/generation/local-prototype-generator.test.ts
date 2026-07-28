@@ -35,6 +35,7 @@ describe('LocalPrototypeRecipeGenerator', () => {
 
   it('does not claim to be AI in the mode label', () => {
     expect(generator.modeLabel.toLowerCase()).toContain('prototype');
-    expect(generator.modeLabel.toLowerCase()).toContain('not connected');
+    expect(generator.modeLabel.toLowerCase()).toContain('no ai request');
+    expect(generator.requiresSampleReview).toBe(false);
   });
 });

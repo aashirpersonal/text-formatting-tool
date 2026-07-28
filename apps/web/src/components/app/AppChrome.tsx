@@ -1,5 +1,6 @@
 'use client';
 
+import Link from 'next/link';
 import {
   FileText,
   HelpCircle,
@@ -11,9 +12,10 @@ import {
   Sparkles,
   X,
 } from 'lucide-react';
-import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useEffect, useId, useState } from 'react';
+import { fetchRecipeGeneratorStatus } from '@/generation/create-recipe-generator';
+import type { PublicRecipeGeneratorStatus } from '@/generation/types';
 
 export function AppChrome() {
   const pathname = usePathname();
@@ -21,6 +23,10 @@ export function AppChrome() {
   const menuId = useId();
   const isAdvanced = pathname.startsWith('/app/advanced');
   const isAppHome = pathname === '/app' || pathname === '/app/';
+  const [status, setStatus] = useState<PublicRecipeGeneratorStatus>({
+    mode: 'prototype',
+    openaiReady: false,
+  });
 
   useEffect(() => {
     if (!menuOpen) {
@@ -42,6 +48,20 @@ export function AppChrome() {
     };
   }, [menuOpen]);
 
+  useEffect(() => {
+    let cancelled = false;
+    void fetchRecipeGeneratorStatus().then((next) => {
+      if (!cancelled) {
+        setStatus(next);
+      }
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  const modeBadge = status.mode === 'openai' ? 'AI recipes · local execution' : 'Prototype';
+
   return (
     <>
       <header className="app-bar" data-testid="app-bar">
@@ -59,9 +79,28 @@ export function AppChrome() {
             <Plus size={16} aria-hidden />
             New transformation
           </Link>
-          <span className="prototype-badge" role="status" data-testid="prototype-notice">
-            Prototype
+          <span
+            className="prototype-badge"
+            role="status"
+            data-testid="prototype-notice"
+            title={
+              status.mode === 'openai'
+                ? 'Only approved excerpts are sent. Preview and apply stay local.'
+                : 'Local prototype generator. No AI request is made.'
+            }
+          >
+            {modeBadge}
           </span>
+          {status.mode === 'openai' ? (
+            <Link
+              className="muted ai-privacy-hint"
+              href="/privacy"
+              data-testid="ai-excerpts-hint"
+              title="Only approved excerpts are sent"
+            >
+              Only approved excerpts are sent
+            </Link>
+          ) : null}
         </div>
 
         <div className="app-bar-actions">

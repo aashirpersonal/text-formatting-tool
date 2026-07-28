@@ -100,6 +100,155 @@ test('mobile simple flow without horizontal overflow', async ({ page }) => {
   await expectNoHorizontalOverflow(page);
 });
 
+test('openai mode sample review excludes the full document from the API request', async ({
+  page,
+}) => {
+  await page.setViewportSize({ width: 390, height: 844 });
+  const marker = 'FULL_DOCUMENT_SHOULD_NEVER_APPEAR_IN_REQUEST';
+  const large = `${'alpha line with padding text\n'.repeat(120)}${marker}\n${'omega line with padding text\n'.repeat(120)}`;
+  expect(large.length).toBeGreaterThan(2000);
+  const postedBodies: string[] = [];
+
+  await page.addInitScript(() => {
+    const originalFetch = window.fetch.bind(window);
+    window.fetch = async (input: RequestInfo | URL, init?: RequestInit) => {
+      const url = String(typeof input === 'string' || input instanceof URL ? input : input.url);
+      if (!url.includes('/api/recipes/generate')) {
+        return originalFetch(input, init);
+      }
+      const method = (init?.method ?? 'GET').toUpperCase();
+      if (method === 'GET') {
+        return new Response(JSON.stringify({ mode: 'openai', openaiReady: true }), {
+          status: 200,
+          headers: { 'Content-Type': 'application/json', 'Cache-Control': 'no-store' },
+        });
+      }
+      const body = String(init?.body ?? '');
+      (window as unknown as { __tftPostedBodies?: string[] }).__tftPostedBodies = [
+        ...((window as unknown as { __tftPostedBodies?: string[] }).__tftPostedBodies ?? []),
+        body,
+      ];
+      return new Response(
+        JSON.stringify({
+          ok: true,
+          result: {
+            version: '1.0',
+            outcome: 'plan',
+            message: 'Trim and dedupe lines.',
+            plan: {
+              schemaVersion: '1.0',
+              title: 'Clean list',
+              summary: 'Trim and dedupe.',
+              assumptions: [],
+              warnings: [],
+              operations: [
+                {
+                  id: 'op1',
+                  type: 'lines.trim',
+                  enabled: true,
+                  description: 'Trim',
+                  mode: 'both',
+                },
+                {
+                  id: 'op2',
+                  type: 'lines.removeEmpty',
+                  enabled: true,
+                  description: 'Remove empty',
+                  whitespaceOnly: true,
+                },
+                {
+                  id: 'op3',
+                  type: 'lines.dedupe',
+                  enabled: true,
+                  description: 'Dedupe',
+                  caseSensitive: true,
+                  trimBeforeCompare: true,
+                },
+              ],
+            },
+          },
+        }),
+        {
+          status: 200,
+          headers: { 'Content-Type': 'application/json', 'Cache-Control': 'no-store' },
+        },
+      );
+    };
+  });
+
+  await page.goto('/app');
+  await page.getByTestId('document-input').fill(large);
+  await page.getByTestId('instruction-input').fill('Remove duplicate lines and trim spaces');
+  await page.getByTestId('generate-transformation').click();
+  await expect(page.getByTestId('sample-review')).toBeVisible();
+  await expect(page.getByTestId('sample-review-summary')).toContainText(/characters selected/i);
+  await expectNoHorizontalOverflow(page);
+  await page.getByTestId('generate-safely').click();
+  await expect(page.getByTestId('generation-summary')).toBeVisible();
+
+  const bodies = await page.evaluate(
+    () => (window as unknown as { __tftPostedBodies?: string[] }).__tftPostedBodies ?? [],
+  );
+  expect(bodies.length).toBeGreaterThan(0);
+  postedBodies.push(...bodies);
+  for (const postData of postedBodies) {
+    expect(postData).not.toMatch(/"document"\s*:|"fullDocument"\s*:|"model"\s*:/);
+    const parsed = JSON.parse(postData) as {
+      instruction: string;
+      samples: Array<{ text: string }>;
+    };
+    expect(parsed.instruction.length).toBeGreaterThan(0);
+    expect(parsed.samples.length).toBeGreaterThan(0);
+    const sampleChars = parsed.samples.reduce((sum, sample) => sum + sample.text.length, 0);
+    expect(sampleChars).toBeLessThan(large.length);
+    expect(postData.length).toBeLessThan(large.length);
+  }
+
+  await page.getByTestId('run-preview').click();
+  await expect(page.getByTestId('preview-after')).toBeVisible();
+  await page.getByTestId('run-full').click();
+  await expect(page.getByTestId('result-output')).toBeVisible();
+});
+
+test('openai unsupported outcome stays local after review', async ({ page }) => {
+  await page.addInitScript(() => {
+    const originalFetch = window.fetch.bind(window);
+    window.fetch = async (input: RequestInfo | URL, init?: RequestInit) => {
+      const url = String(typeof input === 'string' || input instanceof URL ? input : input.url);
+      if (!url.includes('/api/recipes/generate')) {
+        return originalFetch(input, init);
+      }
+      const method = (init?.method ?? 'GET').toUpperCase();
+      if (method === 'GET') {
+        return new Response(JSON.stringify({ mode: 'openai', openaiReady: true }), {
+          status: 200,
+          headers: { 'Content-Type': 'application/json' },
+        });
+      }
+      return new Response(
+        JSON.stringify({
+          ok: true,
+          result: {
+            version: '1.0',
+            outcome: 'unsupported',
+            message:
+              'This request needs open-ended writing or reasoning that the local transformation engine cannot safely reproduce.',
+            plan: null,
+          },
+        }),
+        { status: 200, headers: { 'Content-Type': 'application/json' } },
+      );
+    };
+  });
+  await page.goto('/app');
+  await page.getByTestId('document-input').fill('hello\nworld\n');
+  await page.getByTestId('instruction-input').fill('Rewrite this as a poem');
+  await page.getByTestId('generate-transformation').click();
+  await expect(page.getByTestId('sample-review')).toBeVisible();
+  await page.getByTestId('generate-safely').click();
+  await expect(page.getByTestId('generation-error')).toContainText(/open-ended writing/i);
+});
+
 test('unsupported instruction stays local and friendly', async ({ page }) => {
   await page.goto('/app');
   await page.getByTestId('document-input').fill('hello\n');
