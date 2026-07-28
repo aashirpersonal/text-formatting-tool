@@ -3,9 +3,28 @@ import path from 'node:path';
 import { writeFileSync, mkdtempSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 
+const viewports = [
+  { width: 320, height: 568 },
+  { width: 375, height: 812 },
+  { width: 390, height: 844 },
+  { width: 430, height: 932 },
+  { width: 768, height: 1024 },
+  { width: 1280, height: 800 },
+  { width: 1440, height: 900 },
+] as const;
+
+async function expectNoHorizontalOverflow(page: import('@playwright/test').Page) {
+  const overflow = await page.evaluate(
+    () => document.documentElement.scrollWidth > document.documentElement.clientWidth + 1,
+  );
+  expect(overflow).toBe(false);
+}
+
 test('desktop simple flow: example generate preview apply', async ({ page }) => {
   await page.setViewportSize({ width: 1280, height: 800 });
   await page.goto('/app');
+  await expect(page.getByTestId('app-root')).toBeVisible();
+  await expect(page.getByTestId('site-footer')).toHaveCount(0);
   await page.getByTestId('document-input').fill('  apple  \n  apple  \n  banana  \n');
   await page.getByTestId('example-clean-list').click();
   await page.getByTestId('generate-transformation').click();
@@ -21,17 +40,18 @@ test('desktop simple flow: example generate preview apply', async ({ page }) => 
 test('mobile simple flow without horizontal overflow', async ({ page }) => {
   await page.setViewportSize({ width: 390, height: 844 });
   await page.goto('/app');
+  await expect(page.getByTestId('mobile-tab-preview')).toBeDisabled();
+  await expect(page.getByTestId('mobile-tab-result')).toBeDisabled();
   await page.getByTestId('document-input').fill('  apple  \n  apple  \n  banana  \n');
   await page.getByTestId('example-clean-list').click();
   await page.getByTestId('generate-transformation').click();
+  await expect(page.getByTestId('mobile-tab-preview')).toBeEnabled();
   await page.getByTestId('run-preview').click();
   await expect(page.getByTestId('preview-after')).toHaveText('apple\nbanana\n');
   await page.getByTestId('run-full').click();
   await expect(page.getByTestId('result-output')).toHaveValue('apple\nbanana\n');
-  const overflow = await page.evaluate(
-    () => document.documentElement.scrollWidth > document.documentElement.clientWidth + 1,
-  );
-  expect(overflow).toBe(false);
+  await expect(page.getByTestId('mobile-tab-result')).toBeEnabled();
+  await expectNoHorizontalOverflow(page);
 });
 
 test('unsupported instruction stays local and friendly', async ({ page }) => {
@@ -45,6 +65,7 @@ test('unsupported instruction stays local and friendly', async ({ page }) => {
 
 test('advanced editor still loads manual workspace', async ({ page }) => {
   await page.goto('/app/advanced');
+  await expect(page.getByTestId('app-root')).toBeVisible();
   await expect(page.getByTestId('workspace-shell')).toBeVisible();
   await page.getByTestId('document-input').fill('  apple  \n  apple  \n  banana  \n');
   await page.getByTestId('goto-recipe').click();
@@ -84,6 +105,14 @@ test('landing CTA opens the app', async ({ page }) => {
   await expect(page.getByTestId('simple-app-shell')).toBeVisible();
 });
 
+test('landing reduced-motion still exposes CTAs', async ({ page }) => {
+  await page.emulateMedia({ reducedMotion: 'reduce' });
+  await page.goto('/');
+  await expect(page.getByTestId('landing-cta')).toBeVisible();
+  await expect(page.getByTestId('landing-source')).toBeVisible();
+  await expect(page.getByTestId('hero-product-window')).toBeVisible();
+});
+
 test('file input loads local text on simple app', async ({ page }) => {
   page.on('dialog', (dialog) => dialog.accept());
   const dir = mkdtempSync(path.join(tmpdir(), 'tft-'));
@@ -94,3 +123,13 @@ test('file input loads local text on simple app', async ({ page }) => {
   await expect(page.getByTestId('document-input')).toHaveValue('one\ntwo\n');
   await expect(page.getByTestId('file-meta')).toContainText('sample.txt');
 });
+
+for (const viewport of viewports) {
+  test(`no horizontal overflow at ${viewport.width}x${viewport.height}`, async ({ page }) => {
+    await page.setViewportSize(viewport);
+    await page.goto('/app');
+    await expectNoHorizontalOverflow(page);
+    await page.goto('/');
+    await expectNoHorizontalOverflow(page);
+  });
+}

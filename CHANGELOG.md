@@ -6,6 +6,13 @@ All notable changes to this project will be documented in this file.
 
 ### Added
 
+- Full-viewport application shell for `/app` and `/app/advanced` (no marketing footer).
+- Desktop two-pane workspace with docked instruction composer; mobile Text/Preview/Result tabs.
+- GSAP-powered Product Hunt-oriented homepage (`gsap`, `@gsap/react`) with reduced-motion path.
+- App shell / motion documentation (`docs/v2/APP_SHELL_AND_MOTION_V1.md`).
+
+### Added (earlier)
+
 - Mobile-first simple transform flow at `/app` with example prompts, prototype generation notice, before/after preview, and local apply.
 - Advanced manual recipe editor moved to `/app/advanced`.
 - Product Hunt-oriented landing page redesign and UX reset documentation (`docs/v2/UX_RESET_V1.md`).

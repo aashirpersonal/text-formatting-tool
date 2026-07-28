@@ -6,9 +6,5 @@ export const metadata: Metadata = {
 };
 
 export default function AppPage() {
-  return (
-    <div className="container page stack simple-page">
-      <SimpleAppShell />
-    </div>
-  );
+  return <SimpleAppShell />;
 }

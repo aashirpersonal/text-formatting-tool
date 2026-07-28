@@ -1,7 +1,7 @@
 # UX Reset v1
 
-**Status:** Implemented on `v2-rebuild`  
-**Date:** 2026-07-28  
+**Status:** Implemented on `v2-rebuild`
+**Date:** 2026-07-28
 **Evidence:** EV-029 (implementation screenshots only; not adoption evidence)
 
 ## Product UX principle
@@ -23,8 +23,10 @@ They should not need to understand JSON, TransformationPlan, operation IDs, Work
 5. Apply locally to the complete input
 6. Copy or download the result
 
-Primary route: `/app`  
-Advanced manual editor: `/app/advanced` (subtle nav link only)
+Primary route: `/app` (full-viewport application shell)
+Advanced manual editor: `/app/advanced` (same shell, manual controls)
+
+See also `docs/v2/APP_SHELL_AND_MOTION_V1.md` for the viewport shell and GSAP homepage.
 
 ## Why recipes are hidden
 

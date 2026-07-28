@@ -34,7 +34,7 @@ docs/evidence/                    Evidence register
 - Prototype generator (examples only — not live AI)
 - Preview before/after, then apply locally in a Web Worker
 - Copy / download / restore original
-- See [`docs/v2/UX_RESET_V1.md`](docs/v2/UX_RESET_V1.md)
+- Full-viewport app shell (see [`docs/v2/APP_SHELL_AND_MOTION_V1.md`](docs/v2/APP_SHELL_AND_MOTION_V1.md) and [`docs/v2/UX_RESET_V1.md`](docs/v2/UX_RESET_V1.md))
 
 ### Advanced manual editor (`/app/advanced`)
 

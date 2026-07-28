@@ -8,19 +8,17 @@ export const metadata: Metadata = {
 
 export default function AdvancedAppPage() {
   return (
-    <div className="container page stack">
-      <div className="stack" style={{ gap: '0.75rem' }}>
-        <span className="badge" role="status">
-          Advanced · manual recipes
-        </span>
-        <h1 style={{ margin: 0, letterSpacing: '-0.03em' }}>Advanced editor</h1>
-        <p className="lede">
-          Build a Transformation Plan manually, reorder trusted operations, then preview and process
-          locally in a Web Worker. Prefer the <Link href="/app">simple transform flow</Link> for
-          everyday use.
+    <div className="advanced-workspace" data-testid="advanced-workspace">
+      <header className="advanced-intro">
+        <h1>Advanced recipe editor</h1>
+        <p className="muted">
+          Manual control for trusted operations. Prefer the{' '}
+          <Link href="/app">simple transform flow</Link> for everyday use.
         </p>
+      </header>
+      <div className="advanced-body">
+        <WorkspaceShell />
       </div>
-      <WorkspaceShell />
     </div>
   );
 }

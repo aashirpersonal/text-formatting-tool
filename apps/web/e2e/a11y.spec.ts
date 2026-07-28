@@ -41,12 +41,12 @@ test.describe('accessibility smoke', () => {
     await expectNoSeriousViolations(page);
   });
 
-  test('axe critical issues on mobile menu', async ({ page }) => {
+  test('axe critical issues on mobile app menu', async ({ page }) => {
     await page.setViewportSize({ width: 390, height: 844 });
     await page.goto('/app');
-    await page.getByTestId('nav-toggle').click();
-    await expect(page.getByTestId('nav-toggle')).toHaveAttribute('aria-expanded', 'true');
-    await expect(page.locator('.nav-panel.is-open')).toBeVisible();
+    await page.getByTestId('app-menu-toggle').click();
+    await expect(page.getByTestId('app-menu-toggle')).toHaveAttribute('aria-expanded', 'true');
+    await expect(page.getByTestId('app-overflow-menu')).toBeVisible();
     await expectNoSeriousViolations(page);
   });
 });

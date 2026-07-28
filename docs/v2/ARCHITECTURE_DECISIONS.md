@@ -274,6 +274,20 @@ These ADRs record **approved direction**. They do not claim that the v2 applicat
 
 ---
 
+## ADR-019: Full-viewport app shell and GSAP marketing homepage
+
+| Field                     | Content                                                                                                                                                                                              |
+| ------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Status**                | Accepted — 2026-07-28                                                                                                                                                                                |
+| **Context**               | After the UX reset, `/app` still felt like a centred marketing form rather than a productivity application, and `/` needed a launch-quality presentation.                                            |
+| **Decision**              | Separate marketing and app layouts. Make `/app` a `100dvh` two-pane (desktop) / tabbed (mobile) shell. Animate only the public homepage with GSAP + ScrollTrigger and a reduced-motion settled path. |
+| **Reasons**               | Spatial seriousness for daily use; cinematic Product Hunt storytelling without putting motion inside the editor or sending document content into animation code.                                     |
+| **Alternatives rejected** | Keep shared site chrome on `/app`; animate the editor itself; add WebGL/particles.                                                                                                                   |
+| **Consequences**          | Docs in `docs/v2/APP_SHELL_AND_MOTION_V1.md`; homepage depends on `gsap` / `@gsap/react` client components only.                                                                                     |
+| **Unresolved questions**  | Whether a future resizable split is worth the accessibility cost.                                                                                                                                    |
+
+---
+
 ## Summary table
 
 | ADR | Title                                                | Status             |
@@ -296,3 +310,4 @@ These ADRs record **approved direction**. They do not claim that the v2 applicat
 | 016 | Engine as future npm/CLI                             | Accepted           |
 | 017 | Threat model + reproducible benchmarks               | Accepted           |
 | 018 | Hide recipes; simple mobile-first primary UX         | Accepted           |
+| 019 | Full-viewport app shell + GSAP homepage              | Accepted           |

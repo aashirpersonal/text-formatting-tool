@@ -1,5 +1,7 @@
-import { executeTransformationPlan } from '@tft/transformation-engine';
+import { render, screen, waitFor } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { executeTransformationPlan } from '@tft/transformation-engine';
 
 const executeMock = vi.fn(async (args: { input: string; plan: unknown }) =>
   executeTransformationPlan(args.input, args.plan),
@@ -35,8 +37,6 @@ vi.mock('next/link', () => ({
   ),
 }));
 
-import { render, screen, waitFor } from '@testing-library/react';
-import userEvent from '@testing-library/user-event';
 import { SimpleAppShell } from '@/components/simple/SimpleAppShell';
 
 describe('SimpleAppShell', () => {
@@ -47,11 +47,15 @@ describe('SimpleAppShell', () => {
     window.confirm = vi.fn(() => true);
   });
 
-  it('shows the prototype notice and hides advanced JSON by default', () => {
+  it('renders the full-height workspace without marketing copy', () => {
     render(<SimpleAppShell />);
-    expect(screen.getByTestId('prototype-notice')).toHaveTextContent(/prototype mode/i);
+    expect(screen.getByTestId('simple-app-shell')).toBeVisible();
+    expect(screen.getByTestId('source-pane')).toBeVisible();
+    expect(screen.getByTestId('result-pane')).toBeVisible();
     expect(screen.queryByText(/schemaVersion/i)).not.toBeInTheDocument();
-    expect(screen.getByTestId('advanced-editor-link')).toHaveAttribute('href', '/app/advanced');
+    expect(
+      screen.queryByRole('heading', { name: /tell ai what to change/i }),
+    ).not.toBeInTheDocument();
   });
 
   it('loads an example prompt and rejects unsupported instructions', async () => {
@@ -102,5 +106,11 @@ describe('SimpleAppShell', () => {
     await waitFor(() => expect(screen.getByTestId('result-output')).toBeVisible());
     await user.click(screen.getByTestId('restore-original-from-result'));
     expect(screen.getByTestId('document-input')).toHaveValue(original);
+  });
+
+  it('keeps Preview and Result mobile tabs disabled until ready', () => {
+    render(<SimpleAppShell />);
+    expect(screen.getByTestId('mobile-tab-preview')).toBeDisabled();
+    expect(screen.getByTestId('mobile-tab-result')).toBeDisabled();
   });
 });

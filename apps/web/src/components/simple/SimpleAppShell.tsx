@@ -4,6 +4,7 @@ import type { ExecutionResult } from '@tft/transformation-engine';
 import type { TransformationPlan } from '@tft/transformation-schema';
 import {
   CheckCircle2,
+  ChevronDown,
   Copy,
   Download,
   FileUp,
@@ -12,7 +13,6 @@ import {
   Sparkles,
   X,
 } from 'lucide-react';
-import Link from 'next/link';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import {
   EXAMPLE_PROMPTS,
@@ -37,10 +37,9 @@ import {
 } from '@/worker/transformation-worker-client';
 
 type Phase = 'compose' | 'ready' | 'preview' | 'result';
+type MobileTab = 'text' | 'preview' | 'result';
 type ProcessStatus = 'idle' | 'generating' | 'processing' | 'completed' | 'cancelled' | 'failed';
-
 type FileMeta = { name: string; size: number };
-
 type PreviewState = {
   sampleText: string;
   truncated: boolean;
@@ -52,13 +51,16 @@ const generator = new LocalPrototypeRecipeGenerator();
 export function SimpleAppShell() {
   const workerRef = useRef<TransformationWorkerClient | null>(null);
   const runIdRef = useRef(0);
+  const instructionRef = useRef<HTMLTextAreaElement | null>(null);
   const [phase, setPhase] = useState<Phase>('compose');
+  const [mobileTab, setMobileTab] = useState<MobileTab>('text');
   const [text, setText] = useState('');
   const [originalText, setOriginalText] = useState('');
   const [originalLocked, setOriginalLocked] = useState(false);
   const [fileMeta, setFileMeta] = useState<FileMeta | null>(null);
   const [fileError, setFileError] = useState<string | null>(null);
   const [instruction, setInstruction] = useState('');
+  const [examplesOpen, setExamplesOpen] = useState(true);
   const [generation, setGeneration] = useState<RecipeGenerationSuccess | null>(null);
   const [generationError, setGenerationError] = useState<string | null>(null);
   const [preview, setPreview] = useState<PreviewState | null>(null);
@@ -66,7 +68,7 @@ export function SimpleAppShell() {
   const [fullResult, setFullResult] = useState<Extract<ExecutionResult, { ok: true }> | null>(null);
   const [status, setStatus] = useState<ProcessStatus>('idle');
   const [statusMessage, setStatusMessage] = useState(
-    'Paste text, choose an example, then generate a transformation.',
+    'Paste text, then describe what should change.',
   );
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [copyMessage, setCopyMessage] = useState<string | null>(null);
@@ -88,6 +90,8 @@ export function SimpleAppShell() {
   const canGenerate = text.trim().length > 0 && instruction.trim().length > 0 && !busy;
   const canPreview = Boolean(generation) && text.trim().length > 0 && !busy;
   const canApply = Boolean(preview) && !busy;
+  const previewEnabled = Boolean(generation || preview);
+  const resultEnabled = Boolean(fullResult) || phase === 'result';
 
   function invalidateDownstream(message: string) {
     setGeneration(null);
@@ -101,6 +105,7 @@ export function SimpleAppShell() {
     }
     setStatusMessage(message);
     setPhase('compose');
+    setMobileTab('text');
   }
 
   function updateText(next: string, options?: { asOriginal?: boolean; file?: FileMeta | null }) {
@@ -114,7 +119,7 @@ export function SimpleAppShell() {
     if (options && 'file' in options) {
       setFileMeta(options.file ?? null);
     }
-    invalidateDownstream('Text updated. Generate a new transformation when ready.');
+    invalidateDownstream('Text updated. Generate again when ready.');
   }
 
   async function onFileSelected(fileList: FileList | null) {
@@ -154,6 +159,19 @@ export function SimpleAppShell() {
     void onFileSelected(event.dataTransfer.files);
   }
 
+  function loadExample(exampleInstruction: string) {
+    setInstruction(exampleInstruction);
+    setGeneration(null);
+    setGenerationError(null);
+    setPreview(null);
+    setFullResult(null);
+    setPhase('compose');
+    setMobileTab('text');
+    setExamplesOpen(false);
+    setStatusMessage('Example loaded. Generate the transformation when ready.');
+    instructionRef.current?.focus();
+  }
+
   async function generateTransformation() {
     if (!canGenerate) {
       return;
@@ -174,12 +192,14 @@ export function SimpleAppShell() {
         setStatus('idle');
         setStatusMessage('Choose an example transformation to continue.');
         setPhase('compose');
+        setMobileTab('text');
         return;
       }
       setGeneration(result);
       setStatus('idle');
       setStatusMessage('Transformation ready. Preview the changes before applying.');
       setPhase('ready');
+      setMobileTab('preview');
     } catch (error) {
       setGeneration(null);
       setGenerationError(
@@ -200,6 +220,7 @@ export function SimpleAppShell() {
     setStatusMessage('Preparing a local preview…');
     setErrorMessage(null);
     setPhase('preview');
+    setMobileTab('preview');
     try {
       const result = await workerRef.current!.execute({
         mode: 'preview',
@@ -226,7 +247,7 @@ export function SimpleAppShell() {
       setStatusMessage(
         sample.truncated
           ? 'Preview ready on a sample from the start of your text.'
-          : 'Preview ready for the full text.',
+          : 'Preview ready.',
       );
     } catch (error) {
       if (runId !== runIdRef.current) {
@@ -253,6 +274,7 @@ export function SimpleAppShell() {
     setStatusMessage('Processing the full text locally…');
     setErrorMessage(null);
     setPhase('result');
+    setMobileTab('result');
     try {
       const result = await workerRef.current!.execute({
         mode: 'full',
@@ -319,6 +341,7 @@ export function SimpleAppShell() {
   function restoreOriginal() {
     setText(originalText);
     setPhase('compose');
+    setMobileTab('text');
     if (originalText === text) {
       setStatusMessage('Text already matches the preserved original.');
       return;
@@ -343,217 +366,241 @@ export function SimpleAppShell() {
     setPreview(null);
     setFullResult(null);
     setStatus('idle');
-    setStatusMessage('Paste text, choose an example, then generate a transformation.');
+    setStatusMessage('Paste text, then describe what should change.');
     setErrorMessage(null);
     setCopyMessage(null);
     setPhase('compose');
+    setMobileTab('text');
   }
 
   const friendlyPreview = preview ? summarizeExecution(preview.result) : [];
   const friendlyResult = fullResult ? summarizeExecution(fullResult) : [];
 
-  return (
-    <div className="simple-app" data-testid="simple-app-shell">
-      <div className="prototype-banner" role="status" data-testid="prototype-notice">
-        {generator.modeLabel}
+  const composer = (
+    <div className="composer" data-testid="instruction-composer">
+      <div className="composer-header">
+        <label htmlFor="instruction-input">What should change?</label>
+        <span className="composer-hint muted">Prototype examples only · ⌘/Ctrl+Enter</span>
+      </div>
+      <textarea
+        id="instruction-input"
+        ref={instructionRef}
+        className="textarea composer-input"
+        rows={2}
+        value={instruction}
+        onChange={(event) => {
+          setInstruction(event.target.value);
+          setGeneration(null);
+          setGenerationError(null);
+          setPreview(null);
+          setFullResult(null);
+          setPhase('compose');
+        }}
+        onKeyDown={(event) => {
+          if ((event.metaKey || event.ctrlKey) && event.key === 'Enter') {
+            event.preventDefault();
+            void generateTransformation();
+          }
+        }}
+        placeholder="Example: Remove duplicate lines, trim extra spaces and sort the list alphabetically."
+        data-testid="instruction-input"
+      />
+      <div className="composer-actions">
+        <button
+          type="button"
+          className="button button-secondary button-compact"
+          aria-expanded={examplesOpen}
+          onClick={() => setExamplesOpen((value) => !value)}
+          data-testid="examples-toggle"
+        >
+          Examples
+          <ChevronDown size={16} aria-hidden />
+        </button>
+        <button
+          type="button"
+          className="button button-primary"
+          disabled={!canGenerate}
+          aria-disabled={!canGenerate}
+          onClick={() => void generateTransformation()}
+          data-testid="generate-transformation"
+        >
+          {busy && status === 'generating' ? (
+            <Loader2 className="spin-icon" size={16} aria-hidden />
+          ) : (
+            <Sparkles size={16} aria-hidden />
+          )}
+          Generate transformation
+        </button>
+      </div>
+      <div
+        id="examples"
+        className={examplesOpen ? 'example-chips is-open' : 'example-chips'}
+        role="group"
+        aria-label="Example transformations"
+      >
+        {EXAMPLE_PROMPTS.map((example) => (
+          <button
+            key={example.id}
+            type="button"
+            className="chip"
+            data-testid={`example-${example.id}`}
+            onClick={() => loadExample(example.instruction)}
+          >
+            {example.label}
+          </button>
+        ))}
+      </div>
+      {generationError ? (
+        <p className="error-text" role="alert" data-testid="generation-error">
+          {generationError}
+        </p>
+      ) : null}
+    </div>
+  );
+
+  const sourcePane = (
+    <section
+      className="workspace-pane source-pane"
+      aria-labelledby="your-text-heading"
+      data-testid="source-pane"
+    >
+      <div className="pane-header">
+        <h2 id="your-text-heading">Your text</h2>
+        <div className="pane-meta" aria-live="polite">
+          <span className="stat">{characters} chars</span>
+          <span className="stat">{lines} lines</span>
+          {fileMeta ? (
+            <span className="stat filename-stat" data-testid="file-meta" title={fileMeta.name}>
+              {fileMeta.name}
+            </span>
+          ) : (
+            <span className="stat">{formatBytes(bytes)}</span>
+          )}
+        </div>
+      </div>
+      <div
+        className={dragging ? 'editor-frame is-dragging' : 'editor-frame'}
+        onDragEnter={(event) => {
+          event.preventDefault();
+          setDragging(true);
+        }}
+        onDragOver={(event) => event.preventDefault()}
+        onDragLeave={() => setDragging(false)}
+        onDrop={onDrop}
+        data-testid="dropzone"
+      >
+        <label htmlFor="document-input" className="sr-only">
+          Paste text here, or choose a file
+        </label>
+        <textarea
+          id="document-input"
+          className="textarea editor-textarea"
+          value={text}
+          onChange={(event) => updateText(event.target.value)}
+          placeholder="Paste text here, or choose a file"
+          data-testid="document-input"
+        />
+      </div>
+      <div className="pane-toolbar">
+        <label className="button button-secondary button-compact" htmlFor="file-input">
+          <FileUp size={16} aria-hidden />
+          Choose a file
+        </label>
+        <input
+          id="file-input"
+          type="file"
+          accept=".txt,.md,.csv,.tsv,.log,text/plain,text/markdown,text/csv,text/tab-separated-values"
+          hidden
+          onChange={(event) => {
+            void onFileSelected(event.target.files);
+            event.target.value = '';
+          }}
+          data-testid="file-input"
+        />
+        <button
+          type="button"
+          className="button button-secondary button-compact"
+          onClick={() => {
+            if (text.length > 0 && !window.confirm('Clear the current text?')) {
+              return;
+            }
+            updateText('', { asOriginal: true, file: null });
+            setFileError(null);
+          }}
+          data-testid="clear-input"
+        >
+          Clear
+        </button>
+        <button
+          type="button"
+          className="button button-secondary button-compact"
+          onClick={restoreOriginal}
+          disabled={originalText.length === 0}
+          data-testid="restore-original"
+        >
+          Restore original
+        </button>
+        <span className="muted file-hint desktop-only">
+          .txt · .md · .csv · .tsv · .log · up to {formatBytes(MAX_INPUT_BYTES)} · stays on device
+        </span>
+      </div>
+      {fileError ? (
+        <p className="error-text" role="alert" data-testid="file-error">
+          {fileError}
+        </p>
+      ) : null}
+    </section>
+  );
+
+  const rightPane = (
+    <section
+      className="workspace-pane result-pane"
+      aria-labelledby="intelligence-heading"
+      data-testid="result-pane"
+    >
+      <div className="pane-header">
+        <h2 id="intelligence-heading">
+          {phase === 'result'
+            ? 'Result'
+            : phase === 'preview' || preview
+              ? 'Preview'
+              : generation
+                ? 'Transformation'
+                : 'Preview'}
+        </h2>
+        <p className="status-line" aria-live="polite" data-testid="simple-status">
+          {busy ? <Loader2 className="spin-icon" aria-hidden size={16} /> : null}
+          {statusMessage}
+          {busy ? (
+            <button
+              type="button"
+              className="button button-secondary button-compact"
+              onClick={cancelProcessing}
+              data-testid="cancel-processing"
+            >
+              Cancel
+            </button>
+          ) : null}
+        </p>
       </div>
 
-      <header className="simple-hero stack">
-        <h1 className="simple-title">Tell AI what to change. Apply it locally.</h1>
-        <p className="lede">
-          Describe the transformation once. Review a preview, then process the full text securely in
-          your browser.
-        </p>
-        <p className="muted onboarding-line">
-          Tip: start with an example below. The advanced recipe editor is available for power users.
-        </p>
-      </header>
-
-      <p className="status-line" aria-live="polite" data-testid="simple-status">
-        {busy ? <Loader2 className="spin-icon" aria-hidden size={16} /> : null}
-        {statusMessage}
-        {busy ? (
-          <button
-            type="button"
-            className="button button-secondary button-compact"
-            onClick={cancelProcessing}
-            data-testid="cancel-processing"
-          >
-            Cancel
-          </button>
-        ) : null}
-      </p>
       {errorMessage ? (
         <p className="error-text" role="alert" data-testid="simple-error">
           {errorMessage}
         </p>
       ) : null}
 
-      {(phase === 'compose' || phase === 'ready') && (
-        <section className="panel stack compose-panel" aria-labelledby="your-text-heading">
-          <div className="meta-row">
-            <h2 id="your-text-heading" style={{ margin: 0 }}>
-              Your text
-            </h2>
-            <div className="meta-row" aria-live="polite">
-              <span className="stat">{characters} characters</span>
-              <span className="stat">{lines} lines</span>
-              {fileMeta ? (
-                <span className="stat" data-testid="file-meta">
-                  {fileMeta.name} ({formatBytes(fileMeta.size)})
-                </span>
-              ) : (
-                <span className="stat">{formatBytes(bytes)}</span>
-              )}
-            </div>
-          </div>
-
-          <div
-            className={dragging ? 'dropzone is-dragging' : 'dropzone'}
-            onDragEnter={(event) => {
-              event.preventDefault();
-              setDragging(true);
-            }}
-            onDragOver={(event) => event.preventDefault()}
-            onDragLeave={() => setDragging(false)}
-            onDrop={onDrop}
-            data-testid="dropzone"
-          >
-            <label htmlFor="document-input" className="sr-only">
-              Paste text here, or choose a file
-            </label>
-            <textarea
-              id="document-input"
-              className="textarea"
-              value={text}
-              onChange={(event) => {
-                updateText(event.target.value);
-              }}
-              placeholder="Paste text here, or choose a file"
-              data-testid="document-input"
-            />
-            <div className="actions wrap-actions">
-              <label className="button button-secondary" htmlFor="file-input">
-                <FileUp size={16} aria-hidden />
-                Choose a file
-              </label>
-              <input
-                id="file-input"
-                type="file"
-                accept=".txt,.md,.csv,.tsv,.log,text/plain,text/markdown,text/csv,text/tab-separated-values"
-                hidden
-                onChange={(event) => {
-                  void onFileSelected(event.target.files);
-                  event.target.value = '';
-                }}
-                data-testid="file-input"
-              />
-              <button
-                type="button"
-                className="button button-secondary"
-                onClick={() => {
-                  if (text.length > 0 && !window.confirm('Clear the current text?')) {
-                    return;
-                  }
-                  updateText('', { asOriginal: true, file: null });
-                  setFileError(null);
-                }}
-                data-testid="clear-input"
-              >
-                Clear
-              </button>
-              <button
-                type="button"
-                className="button button-secondary"
-                onClick={restoreOriginal}
-                disabled={originalText.length === 0}
-                data-testid="restore-original"
-              >
-                Restore original
-              </button>
-            </div>
-            <p className="muted file-hint">
-              Supports .txt, .md, .csv, .tsv, .log up to {formatBytes(MAX_INPUT_BYTES)}. Files stay
-              on this device.
-            </p>
-            {fileError ? (
-              <p className="error-text" role="alert" data-testid="file-error">
-                {fileError}
-              </p>
-            ) : null}
-          </div>
-
-          <div className="stack">
-            <label htmlFor="instruction-input">
-              <strong>What should change?</strong>
-            </label>
-            <textarea
-              id="instruction-input"
-              className="textarea instruction-input"
-              rows={3}
-              value={instruction}
-              onChange={(event) => {
-                setInstruction(event.target.value);
-                setGeneration(null);
-                setGenerationError(null);
-                setPreview(null);
-                setFullResult(null);
-                setPhase('compose');
-              }}
-              placeholder="Example: Remove duplicate lines, trim extra spaces and sort the list alphabetically."
-              data-testid="instruction-input"
-            />
-            <div className="example-chips" role="group" aria-label="Example transformations">
-              {EXAMPLE_PROMPTS.map((example) => (
-                <button
-                  key={example.id}
-                  type="button"
-                  className="chip"
-                  data-testid={`example-${example.id}`}
-                  onClick={() => {
-                    setInstruction(example.instruction);
-                    setGeneration(null);
-                    setGenerationError(null);
-                    setPreview(null);
-                    setFullResult(null);
-                    setPhase('compose');
-                    setStatusMessage('Example loaded. Generate the transformation when ready.');
-                  }}
-                >
-                  {example.label}
-                </button>
-              ))}
-            </div>
-            {generationError ? (
-              <p className="error-text" role="alert" data-testid="generation-error">
-                {generationError}
-              </p>
-            ) : null}
-            <button
-              type="button"
-              className="button button-primary button-block"
-              disabled={!canGenerate}
-              aria-disabled={!canGenerate}
-              onClick={() => void generateTransformation()}
-              data-testid="generate-transformation"
-            >
-              <Sparkles size={16} aria-hidden />
-              Generate transformation
-            </button>
-          </div>
-        </section>
-      )}
+      {!generation && !preview && !fullResult ? (
+        <div className="empty-intelligence" data-testid="intelligence-empty">
+          <p>Generate a transformation to preview changes here.</p>
+          <p className="muted">Pick an example below the instruction field, then generate.</p>
+        </div>
+      ) : null}
 
       {generation && (phase === 'ready' || phase === 'preview' || phase === 'result') ? (
-        <section
-          className="panel stack"
-          aria-labelledby="transformation-heading"
-          data-testid="generation-summary"
-        >
+        <div className="stack intelligence-block" data-testid="generation-summary">
           <div className="meta-row">
-            <h2 id="transformation-heading" style={{ margin: 0 }}>
-              {generation.title}
-            </h2>
+            <strong>{generation.title}</strong>
             <span className="badge badge-soft">Prototype</span>
           </div>
           <p style={{ margin: 0 }}>{generation.explanation}</p>
@@ -568,95 +615,88 @@ export function SimpleAppShell() {
             </ul>
           ) : null}
           <AdvancedDetails plan={generation.plan} />
-        </section>
+          {phase === 'ready' ? (
+            <button
+              type="button"
+              className="button button-primary"
+              disabled={!canPreview}
+              aria-disabled={!canPreview}
+              onClick={() => void runPreview()}
+              data-testid="run-preview"
+            >
+              Preview
+            </button>
+          ) : null}
+        </div>
       ) : null}
 
-      {phase === 'preview' || preview ? (
-        <section
-          className="panel stack"
-          aria-labelledby="preview-heading"
-          data-testid="preview-stage"
-        >
-          <h2 id="preview-heading" style={{ margin: 0 }}>
-            Preview
-          </h2>
-          {!preview ? (
-            <p className="muted">Run a local preview to compare before and after.</p>
-          ) : (
-            <>
-              <p className="muted" data-testid="preview-truncation">
-                {preview.truncated
-                  ? 'Showing a sample from the start of your text. Full processing may find more changes.'
-                  : 'Preview covers your full text.'}{' '}
-                Nothing is sent remotely.
-              </p>
-              <div className="segmented" role="tablist" aria-label="Preview view">
-                <button
-                  type="button"
-                  role="tab"
-                  className={previewTab === 'before' ? 'segment is-active' : 'segment'}
-                  aria-selected={previewTab === 'before'}
-                  onClick={() => setPreviewTab('before')}
-                >
-                  Before
-                </button>
-                <button
-                  type="button"
-                  role="tab"
-                  className={previewTab === 'after' ? 'segment is-active' : 'segment'}
-                  aria-selected={previewTab === 'after'}
-                  onClick={() => setPreviewTab('after')}
-                >
-                  After
-                </button>
-              </div>
-              <div className="preview-grid">
-                <div
-                  className={previewTab === 'before' ? 'preview-pane is-active' : 'preview-pane'}
-                >
-                  <h3>Before</h3>
-                  <pre className="code-block" data-testid="preview-before">
-                    {preview.sampleText}
-                  </pre>
-                </div>
-                <div className={previewTab === 'after' ? 'preview-pane is-active' : 'preview-pane'}>
-                  <h3>After</h3>
-                  <pre className="code-block" data-testid="preview-after">
-                    {preview.result.output}
-                  </pre>
-                </div>
-              </div>
-              <ul className="friendly-report" data-testid="friendly-preview-report">
-                {friendlyPreview.map((item) => (
-                  <li key={item}>{item}</li>
-                ))}
-              </ul>
-            </>
-          )}
-        </section>
+      {(phase === 'preview' || preview) && preview ? (
+        <div className="stack intelligence-block" data-testid="preview-stage">
+          <p className="muted" data-testid="preview-truncation">
+            {preview.truncated
+              ? 'Showing a sample from the start of your text.'
+              : 'Preview covers your full text.'}
+          </p>
+          <div className="segmented" role="tablist" aria-label="Preview view">
+            <button
+              type="button"
+              role="tab"
+              className={previewTab === 'before' ? 'segment is-active' : 'segment'}
+              aria-selected={previewTab === 'before'}
+              onClick={() => setPreviewTab('before')}
+            >
+              Before
+            </button>
+            <button
+              type="button"
+              role="tab"
+              className={previewTab === 'after' ? 'segment is-active' : 'segment'}
+              aria-selected={previewTab === 'after'}
+              onClick={() => setPreviewTab('after')}
+            >
+              After
+            </button>
+          </div>
+          <div className="preview-grid">
+            <div className={previewTab === 'before' ? 'preview-pane is-active' : 'preview-pane'}>
+              <h3>Before</h3>
+              <pre className="code-block" data-testid="preview-before">
+                {preview.sampleText}
+              </pre>
+            </div>
+            <div className={previewTab === 'after' ? 'preview-pane is-active' : 'preview-pane'}>
+              <h3>After</h3>
+              <pre className="code-block" data-testid="preview-after">
+                {preview.result.output}
+              </pre>
+            </div>
+          </div>
+          <ul className="friendly-report" data-testid="friendly-preview-report">
+            {friendlyPreview.map((item) => (
+              <li key={item}>{item}</li>
+            ))}
+          </ul>
+          <button
+            type="button"
+            className="button button-primary"
+            disabled={!canApply}
+            aria-disabled={!canApply}
+            onClick={() => void runFull()}
+            data-testid="run-full"
+          >
+            Apply locally
+          </button>
+        </div>
       ) : null}
 
       {phase === 'result' ? (
-        <section
-          className="panel stack"
-          aria-labelledby="result-heading"
-          data-testid="result-stage"
-        >
-          <div className="meta-row">
-            <h2 id="result-heading" style={{ margin: 0 }}>
-              Result
-            </h2>
-            {fullResult ? (
+        <div className="stack intelligence-block" data-testid="result-stage">
+          {fullResult ? (
+            <>
               <span className="success-pill" data-testid="success-pill">
                 <CheckCircle2 size={16} aria-hidden />
                 Transformation complete — processed locally
               </span>
-            ) : null}
-          </div>
-          {!fullResult ? (
-            <p className="muted">Apply the transformation to see the full result.</p>
-          ) : (
-            <>
               <ul className="friendly-report" data-testid="friendly-result-report">
                 {friendlyResult.map((item) => (
                   <li key={item}>{item}</li>
@@ -665,7 +705,7 @@ export function SimpleAppShell() {
               <label htmlFor="result-output">Transformed text</label>
               <textarea
                 id="result-output"
-                className="textarea"
+                className="textarea result-textarea"
                 readOnly
                 value={fullResult.output}
                 data-testid="result-output"
@@ -678,7 +718,7 @@ export function SimpleAppShell() {
                   data-testid="copy-result"
                 >
                   <Copy size={16} aria-hidden />
-                  Copy result
+                  Copy
                 </button>
                 <button
                   type="button"
@@ -703,6 +743,7 @@ export function SimpleAppShell() {
                   className="button button-secondary"
                   onClick={() => {
                     setPhase('compose');
+                    setMobileTab('text');
                     setStatusMessage('Edit your instruction and generate again.');
                   }}
                   data-testid="edit-instruction"
@@ -716,7 +757,7 @@ export function SimpleAppShell() {
                   data-testid="start-over"
                 >
                   <X size={16} aria-hidden />
-                  Start over
+                  Start again
                 </button>
               </div>
               {copyMessage ? (
@@ -724,56 +765,75 @@ export function SimpleAppShell() {
                   {copyMessage}
                 </p>
               ) : null}
-              <details>
-                <summary>Technical details</summary>
-                <p className="muted">
-                  Input {fullResult.report.inputCharacters} characters · Output{' '}
-                  {fullResult.report.outputCharacters} characters ·{' '}
-                  {formatBytes(fullResult.report.inputBytes)} →{' '}
-                  {formatBytes(fullResult.report.outputBytes)}
-                </p>
-              </details>
             </>
+          ) : (
+            <p className="muted">Apply the transformation to see the full result.</p>
           )}
-        </section>
-      ) : null}
-
-      {(phase === 'ready' || phase === 'preview') && (
-        <div className="sticky-action-bar" data-testid="sticky-action-bar">
-          {phase === 'ready' ? (
-            <button
-              type="button"
-              className="button button-primary button-block"
-              disabled={!canPreview}
-              aria-disabled={!canPreview}
-              onClick={() => void runPreview()}
-              data-testid="run-preview"
-            >
-              Preview changes
-            </button>
-          ) : null}
-          {phase === 'preview' && preview ? (
-            <button
-              type="button"
-              className="button button-primary button-block"
-              disabled={!canApply}
-              aria-disabled={!canApply}
-              onClick={() => void runFull()}
-              data-testid="run-full"
-            >
-              Apply to full text locally
-            </button>
-          ) : null}
         </div>
-      )}
+      ) : null}
+    </section>
+  );
 
-      <p className="muted advanced-link-row">
-        Need manual control?{' '}
-        <Link href="/app/advanced" data-testid="advanced-editor-link">
-          Open the advanced editor
-        </Link>
-        .
-      </p>
+  return (
+    <div className="app-workspace" data-testid="simple-app-shell">
+      <div className="mobile-tabs" role="tablist" aria-label="Workspace" data-testid="mobile-tabs">
+        <button
+          type="button"
+          role="tab"
+          className={mobileTab === 'text' ? 'mobile-tab is-active' : 'mobile-tab'}
+          aria-selected={mobileTab === 'text'}
+          data-testid="mobile-tab-text"
+          onClick={() => setMobileTab('text')}
+        >
+          Text
+        </button>
+        <button
+          type="button"
+          role="tab"
+          className={mobileTab === 'preview' ? 'mobile-tab is-active' : 'mobile-tab'}
+          aria-selected={mobileTab === 'preview'}
+          aria-disabled={!previewEnabled}
+          disabled={!previewEnabled}
+          data-testid="mobile-tab-preview"
+          onClick={() => previewEnabled && setMobileTab('preview')}
+        >
+          Preview
+        </button>
+        <button
+          type="button"
+          role="tab"
+          className={mobileTab === 'result' ? 'mobile-tab is-active' : 'mobile-tab'}
+          aria-selected={mobileTab === 'result'}
+          aria-disabled={!resultEnabled}
+          disabled={!resultEnabled}
+          data-testid="mobile-tab-result"
+          onClick={() => resultEnabled && setMobileTab('result')}
+        >
+          Result
+        </button>
+      </div>
+
+      <div className="workspace-split">
+        <div
+          className={mobileTab === 'text' ? 'mobile-surface is-active' : 'mobile-surface'}
+          data-mobile-surface="text"
+        >
+          {sourcePane}
+        </div>
+        <div
+          className={
+            mobileTab === 'preview' || mobileTab === 'result'
+              ? 'mobile-surface is-active'
+              : 'mobile-surface'
+          }
+          data-mobile-surface="intelligence"
+        >
+          {rightPane}
+        </div>
+        <div className="composer-slot" data-testid="mobile-composer">
+          {composer}
+        </div>
+      </div>
     </div>
   );
 }
@@ -784,7 +844,7 @@ function AdvancedDetails({ plan }: { plan: TransformationPlan }) {
       <summary>Advanced details</summary>
       <div className="stack">
         <p className="muted" style={{ margin: 0 }}>
-          Trusted operations run locally in a Web Worker. Generated JavaScript is never executed.
+          Trusted operations run locally in your browser. Generated code is never executed.
         </p>
         <ul className="compact-list">
           {plan.operations.map((operation) => (
