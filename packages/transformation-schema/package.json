@@ -3,7 +3,7 @@
   "version": "0.0.0",
   "private": true,
   "type": "module",
-  "description": "Placeholder package for the future versioned TransformationPlan schema.",
+  "description": "Strict Transformation Plan v1 schema (Zod) for allowlisted deterministic operations.",
   "exports": {
     ".": {
       "types": "./src/index.ts",
@@ -14,12 +14,18 @@
     "src"
   ],
   "scripts": {
-    "lint": "tsc --noEmit",
+    "lint": "eslint .",
     "typecheck": "tsc --noEmit",
     "test": "vitest run"
   },
   "devDependencies": {
+    "@eslint/js": "^9.39.5",
+    "eslint": "^9.39.5",
     "typescript": "^5.7.4",
+    "typescript-eslint": "^8.65.0",
     "vitest": "^4.1.10"
+  },
+  "dependencies": {
+    "zod": "^4.4.3"
   }
 }

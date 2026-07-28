@@ -62,6 +62,8 @@ These ADRs record **approved direction**. They do not claim that the v2 applicat
 | **Consequences**          | Expressiveness limited to allowlisted plan operations; some user requests must be refused.                                                                                                                                                       |
 | **Unresolved questions**  | UX copy for clear refusals when a request needs capabilities outside the allowlist.                                                                                                                                                              |
 
+**Implementation note (2026-07-28):** Engine and schema packages enforce the no-eval boundary for Plan v1. UI still does not execute plans.
+
 ---
 
 ## ADR-005: Versioned JSON `TransformationPlan` with allowlisted operations
@@ -76,6 +78,8 @@ These ADRs record **approved direction**. They do not claim that the v2 applicat
 | **Consequences**          | Requires careful ops catalogue design and migration rules between plan versions.                                                                               |
 | **Unresolved questions**  | Initial ops catalogue size; plan versioning policy (`planVersion` semver vs integer).                                                                          |
 
+**Implementation note (2026-07-28):** Plan v1 shipped as `schemaVersion: "1.0"` in `@tft/transformation-schema` with eight allowlisted operations. Spec: `docs/v2/TRANSFORMATION_PLAN_V1.md`. Field name is `schemaVersion` (not `planVersion`).
+
 ---
 
 ## ADR-006: Validate transformation plans on both server and client
@@ -89,6 +93,8 @@ These ADRs record **approved direction**. They do not claim that the v2 applicat
 | **Alternatives rejected** | Server-only validation; client-only validation; trust model output without schema checks.                                                                               |
 | **Consequences**          | Shared schema package or duplicated schema with CI drift checks.                                                                                                        |
 | **Unresolved questions**  | Schema library choice (e.g. Zod) at scaffold time.                                                                                                                      |
+
+**Implementation note (2026-07-28):** Zod **4.4.3** is the direct schema dependency. `executeTransformationPlan` validates unknown plans via `safeParseTransformationPlan` before any mutation. Server/client product integration remains future work.
 
 ---
 
@@ -118,6 +124,8 @@ These ADRs record **approved direction**. They do not claim that the v2 applicat
 | **Consequences**          | Browser memory/Worker design becomes critical; very large files need streaming/chunked engine strategies.                                                             |
 | **Unresolved questions**  | Soft/hard size limits for MVP; disk-backed strategies later.                                                                                                          |
 
+**Implementation note (2026-07-28):** Core engine library exists and is UI-agnostic. Workspace integration and Web Worker packaging are not done in this milestone.
+
 ---
 
 ## ADR-009: Execute the trusted transformation engine in a Web Worker
@@ -131,6 +139,8 @@ These ADRs record **approved direction**. They do not claim that the v2 applicat
 | **Alternatives rejected** | Main-thread-only engine; model-generated Worker source code.                                              |
 | **Consequences**          | Structured messaging protocol for progress/cancel/results; careful Transferable usage for large strings.  |
 | **Unresolved questions**  | Worker bundling approach under Next.js; fallback when Workers unavailable.                                |
+
+**Implementation note (2026-07-28):** Engine core is Worker-compatible (no DOM/`Buffer`), but Worker packaging and UI messaging are still future work.
 
 ---
 
@@ -146,6 +156,8 @@ These ADRs record **approved direction**. They do not claim that the v2 applicat
 | **Consequences**          | Requires cooperative cancellation in ops implementations.                                                                                                                              |
 | **Unresolved questions**  | Default limits for MVP; whether limits are user-configurable.                                                                                                                          |
 
+**Implementation note (2026-07-28):** Structured failures and configurable UTF-8 / operation limits are implemented. Progress events, cancellation, and timing wrappers are not yet implemented.
+
 ---
 
 ## ADR-011: Regex as a high-risk allowlisted operation
@@ -159,6 +171,8 @@ These ADRs record **approved direction**. They do not claim that the v2 applicat
 | **Alternatives rejected** | Ban all regex; unrestricted regex; model-authored regex executed without limits.                                                                                                                                          |
 | **Consequences**          | Some power-user patterns unsupported initially.                                                                                                                                                                           |
 | **Unresolved questions**  | Exact regex dialect and complexity metrics.                                                                                                                                                                               |
+
+**Implementation note (2026-07-28):** Plan v1 intentionally omits regex operations. Literal matching only.
 
 ---
 

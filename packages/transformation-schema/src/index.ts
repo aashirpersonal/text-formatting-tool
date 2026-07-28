@@ -1,26 +1,42 @@
 /**
- * Foundation placeholder for the future versioned TransformationPlan.
+ * @tft/transformation-schema — Transformation Plan v1
  *
- * This package intentionally does not yet define a production schema.
- * A real allowlisted discriminated-union schema will be added in a later
- * milestone (see docs/v2/ARCHITECTURE_DECISIONS.md ADR-005).
+ * Strict, versioned JSON plans for deterministic text transforms.
+ * Plans never contain executable JavaScript. See docs/v2/TRANSFORMATION_PLAN_V1.md.
  */
 
-export const TRANSFORMATION_SCHEMA_STATUS = 'not_implemented' as const;
+export { PLAN_LIMITS, type PlanLimits } from './limits.js';
 
-export type TransformationSchemaStatus = typeof TRANSFORMATION_SCHEMA_STATUS;
+export {
+  OPERATION_TYPES,
+  type OperationType,
+  transformationOperationSchema,
+  replaceLiteralOperationSchema,
+  linesTrimOperationSchema,
+  linesRemoveEmptyOperationSchema,
+  linesDedupeOperationSchema,
+  linesFilterContainsOperationSchema,
+  linesAffixOperationSchema,
+  lineEndingsNormalizeOperationSchema,
+  unicodeNormalizeOperationSchema,
+  type TransformationOperation,
+  type ReplaceLiteralOperation,
+  type LinesTrimOperation,
+  type LinesRemoveEmptyOperation,
+  type LinesDedupeOperation,
+  type LinesFilterContainsOperation,
+  type LinesAffixOperation,
+  type LineEndingsNormalizeOperation,
+  type UnicodeNormalizeOperation,
+} from './operations.js';
 
-/**
- * Placeholder type only. Do not treat this as a validated production plan.
- */
-export type TransformationPlanPlaceholder = {
-  readonly planVersion: 'unspecified';
-  readonly status: TransformationSchemaStatus;
-};
+export {
+  TRANSFORMATION_PLAN_SCHEMA_VERSION,
+  transformationPlanSchema,
+  parseTransformationPlan,
+  safeParseTransformationPlan,
+  type TransformationPlan,
+  type SafeParseTransformationPlanResult,
+} from './plan.js';
 
-export function createTransformationPlanPlaceholder(): TransformationPlanPlaceholder {
-  return {
-    planVersion: 'unspecified',
-    status: TRANSFORMATION_SCHEMA_STATUS,
-  };
-}
+export { getTransformationPlanJsonSchema, transformationPlanJsonSchema } from './json-schema.js';
