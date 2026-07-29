@@ -6,7 +6,7 @@ export async function fetchRecipeGeneratorStatus(
   fetchImpl: typeof fetch = fetch,
 ): Promise<PublicRecipeGeneratorStatus> {
   try {
-    const response = await fetchImpl('/api/recipes/generate', {
+    const response = await fetchImpl('/api/recipes/status', {
       method: 'GET',
       headers: { Accept: 'application/json' },
       credentials: 'same-origin',

@@ -113,11 +113,11 @@ test('openai mode sample review excludes the full document from the API request'
     const originalFetch = window.fetch.bind(window);
     window.fetch = async (input: RequestInfo | URL, init?: RequestInit) => {
       const url = String(typeof input === 'string' || input instanceof URL ? input : input.url);
-      if (!url.includes('/api/recipes/generate')) {
+      if (!url.includes('/api/recipes/generate') && !url.includes('/api/recipes/status')) {
         return originalFetch(input, init);
       }
       const method = (init?.method ?? 'GET').toUpperCase();
-      if (method === 'GET') {
+      if (method === 'GET' || url.includes('/api/recipes/status')) {
         return new Response(JSON.stringify({ mode: 'openai', openaiReady: true }), {
           status: 200,
           headers: { 'Content-Type': 'application/json', 'Cache-Control': 'no-store' },
@@ -215,11 +215,11 @@ test('openai unsupported outcome stays local after review', async ({ page }) => 
     const originalFetch = window.fetch.bind(window);
     window.fetch = async (input: RequestInfo | URL, init?: RequestInit) => {
       const url = String(typeof input === 'string' || input instanceof URL ? input : input.url);
-      if (!url.includes('/api/recipes/generate')) {
+      if (!url.includes('/api/recipes/generate') && !url.includes('/api/recipes/status')) {
         return originalFetch(input, init);
       }
       const method = (init?.method ?? 'GET').toUpperCase();
-      if (method === 'GET') {
+      if (method === 'GET' || url.includes('/api/recipes/status')) {
         return new Response(JSON.stringify({ mode: 'openai', openaiReady: true }), {
           status: 200,
           headers: { 'Content-Type': 'application/json' },

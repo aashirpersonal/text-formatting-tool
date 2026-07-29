@@ -3,10 +3,7 @@ import {
   safeParseRecipeGenerationApiRequest,
 } from '@tft/transformation-schema';
 import { NextResponse } from 'next/server';
-import {
-  getPublicRecipeGeneratorStatus,
-  getRecipeGeneratorRuntimeConfig,
-} from '@/server/recipe-generation/config';
+import { getRecipeGeneratorRuntimeConfig } from '@/server/recipe-generation/config';
 import { generateRecipeWithOpenAI } from '@/server/recipe-generation/openai-provider';
 import {
   buildRecipeRateLimitKey,
@@ -18,6 +15,11 @@ export const runtime = 'nodejs';
 
 const NO_STORE_HEADERS = {
   'Cache-Control': 'no-store',
+};
+
+const METHOD_NOT_ALLOWED_HEADERS = {
+  ...NO_STORE_HEADERS,
+  Allow: 'POST',
 };
 
 function jsonError(
@@ -56,17 +58,21 @@ function assertSameOrigin(request: Request): boolean {
   }
 }
 
+/**
+ * Recipe generation is POST-only. Public mode status lives at GET /api/recipes/status.
+ * GET here never calls the provider and never spends tokens.
+ */
 export async function GET(): Promise<NextResponse> {
-  return NextResponse.json(getPublicRecipeGeneratorStatus(), {
-    headers: NO_STORE_HEADERS,
-  });
+  return NextResponse.json(
+    {
+      code: 'METHOD_NOT_ALLOWED',
+      message: 'Recipe generation accepts POST only. Use GET /api/recipes/status for mode status.',
+    },
+    { status: 405, headers: METHOD_NOT_ALLOWED_HEADERS },
+  );
 }
 
 export async function POST(request: Request): Promise<NextResponse> {
-  if (request.method !== 'POST') {
-    return jsonError(405, { code: 'METHOD_NOT_ALLOWED', message: 'POST only.' });
-  }
-
   const contentType = request.headers.get('content-type') ?? '';
   if (!contentType.toLowerCase().includes('application/json')) {
     return jsonError(415, {

@@ -55,12 +55,14 @@ describe('POST /api/recipes/generate', () => {
     setDefaultRecipeGenerationRateLimiterForTests(null);
   });
 
-  it('returns public status on GET without secrets', async () => {
+  it('rejects GET with 405 and Allow: POST without calling the provider', async () => {
     const response = await GET();
     const json = await response.json();
+    expect(response.status).toBe(405);
+    expect(response.headers.get('allow')).toBe('POST');
     expect(response.headers.get('cache-control')).toBe('no-store');
-    expect(json.mode).toBe('openai');
-    expect(JSON.stringify(json)).not.toMatch(/sk-test|OPENAI_API_KEY/i);
+    expect(json.code).toBe('METHOD_NOT_ALLOWED');
+    expect(generateMock).not.toHaveBeenCalled();
   });
 
   it('rejects non-JSON content types', async () => {
