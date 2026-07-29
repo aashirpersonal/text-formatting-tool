@@ -6,6 +6,7 @@ import {
 } from '@tft/transformation-schema';
 import OpenAI from 'openai';
 import { getRecipeGeneratorRuntimeConfig } from './config';
+import { prepareJsonSchemaForOpenAI } from './openai-json-schema';
 import { buildRecipeGenerationSystemPrompt, buildRecipeGenerationUserPrompt } from './prompt';
 
 export type OpenAIRecipeProviderErrorCode =
@@ -61,12 +62,6 @@ function extractOutputText(response: {
   }
   const joined = chunks.join('\n').trim();
   return joined.length > 0 ? joined : null;
-}
-
-function prepareJsonSchemaForOpenAI(schema: Record<string, unknown>): Record<string, unknown> {
-  const clone = structuredClone(schema) as Record<string, unknown>;
-  delete clone.$schema;
-  return clone;
 }
 
 async function callOnce(
@@ -150,11 +145,19 @@ async function callOnce(
       throw error;
     }
     const message = error instanceof Error ? error.message : 'Provider request failed.';
-    if (/timeout|aborted|AbortError/i.test(message)) {
+    const safeMessage = message.replace(/sk-[A-Za-z0-9_-]+/gi, '[REDACTED]');
+    if (/timeout|aborted|AbortError/i.test(safeMessage)) {
       return {
         ok: false,
         code: 'PROVIDER_TIMEOUT',
         message: 'The AI service timed out. Try again.',
+      };
+    }
+    if (/invalid_json_schema|Invalid schema/i.test(safeMessage)) {
+      return {
+        ok: false,
+        code: 'PROVIDER_ERROR',
+        message: 'The recipe schema was rejected by the AI service. Check server configuration.',
       };
     }
     return {

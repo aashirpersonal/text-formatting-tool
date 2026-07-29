@@ -1,7 +1,11 @@
 import { defineConfig, devices } from '@playwright/test';
 
 const port = Number(process.env.PLAYWRIGHT_PORT ?? 3000);
-const baseURL = `http://127.0.0.1:${port}`;
+// Prefer localhost over 127.0.0.1: Next.js 16 Turbopack currently fails to
+// hydrate the app shell when Playwright loads 127.0.0.1 (no React fiber on
+// [data-testid="app-root"]), while localhost hydrates normally.
+const host = process.env.PLAYWRIGHT_HOST ?? 'localhost';
+const baseURL = `http://${host}:${port}`;
 
 export default defineConfig({
   testDir: './e2e',
@@ -13,10 +17,16 @@ export default defineConfig({
     trace: 'on-first-retry',
   },
   webServer: {
-    command: `npm run dev -- --hostname 127.0.0.1 --port ${port}`,
+    // Force prototype mode so founder .env.local OpenAI settings cannot make
+    // deterministic UI e2e depend on a live provider or sample-review gating.
+    command: `npm run dev -- --hostname ${host} --port ${port}`,
     url: baseURL,
     reuseExistingServer: !process.env.CI,
     timeout: 120_000,
+    env: {
+      ...process.env,
+      RECIPE_GENERATOR_MODE: 'prototype',
+    },
   },
   projects: [
     {
